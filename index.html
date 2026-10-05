@@ -1019,7 +1019,7 @@ async function boot(){
     return ask(c === '401' || c === '403' ? 'GitHub refused that token (expired, or not scoped to this repo). Paste a fresh read-only token.'
       : c === '404' ? `Nothing at ${repo}/data.json. Check the repo name, or whether the nightly publish has run yet.`
       : `Could not reach GitHub (${c}). Offline?`); }
-  if(data.schema !== CFG.schema) return ask(`This page reads ${CFG.schema} but the data is ${data.schema}. Rebuild the shell.`);
+  if(data.schema !== CFG.schema) return ask(`This page reads ${CFG.schema} but the data is ${data.schema}. If tonight's build just changed it, GitHub Pages can lag a few minutes: hard-refresh (Ctrl+F5). Still wrong after that? Rebuild the shell.`);
   freshness(data, status);
   $('cockpit-data').textContent = JSON.stringify(data);
   $('gate').hidden = true;
