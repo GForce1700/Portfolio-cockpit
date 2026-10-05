@@ -1,0 +1,1037 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Portfolio Cockpit v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"></script>
+<style>:root{color-scheme:dark;--page:#070a14;--ink:#eef2ff;--ink2:#a9b4d6;--ink3:#7d89ad;--card:rgba(8,14,32,.36);--card-b:rgba(120,170,255,.22);--grid:rgba(160,180,255,.10);--grid2:rgba(160,180,255,.24);--track:rgba(255,255,255,.08);--tip:rgba(14,20,40,.96);--accent:#56B4E9;--acc:86,180,233;--bad:254,106,178;--s1:#0072B2;--s2:#D55E00;--s3:#A276FC;--s4:#009E73;--s5:#F0E442;--s6:#56B4E9;--s7:#E69F00;--st-good:#7AFFBF;--st-watch:#D3C0B7;--st-bad:#FE6AB2;--st-neutral:#EDFEFF}
+
+*{box-sizing:border-box}
+:root{--r:16px;--blur:blur(3px) saturate(125%);--spring:cubic-bezier(.34,1.56,.64,1);--ease:cubic-bezier(.2,.8,.2,1);
+  --glow:0 0 0 1px rgba(var(--acc),.38),0 12px 42px rgba(20,60,160,.5);
+  --bg:radial-gradient(1400px 720px at 6% -14%,rgba(29,42,90,.55) 0%,rgba(11,16,32,0) 62%),
+       linear-gradient(180deg,#050914 0%,#03050c 100%)}
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none;display:block}
+.ind-banner,.stale-banner,.wrap{position:relative;z-index:1}
+html{background:var(--page)}
+body{margin:0;min-height:100vh;background:var(--bg) fixed,var(--page);color:var(--ink);
+  font:14.5px/1.5 Inter,system-ui,sans-serif;font-feature-settings:"tnum" 1;-webkit-font-smoothing:antialiased}
+button{font-family:inherit}
+.wrap{max-width:1840px;margin:0 auto;padding:0 40px 56px}
+.ind-banner{display:flex;gap:10px;align-items:center;justify-content:center;padding:7px 20px;font-size:12.5px;
+  color:var(--ink2);border-bottom:1px dotted rgba(169,180,214,.5);background:rgba(255,255,255,.025)}
+.ind-banner b{color:var(--ink);letter-spacing:.08em}
+.stale-banner{display:none;align-items:center;gap:12px;justify-content:center;padding:10px 20px;font-weight:600;
+  border:2px solid var(--st-bad);background:rgba(var(--bad),.12)}
+.stale-banner b{color:var(--st-bad);letter-spacing:.06em}
+body.stale .stale-banner{display:flex}
+header.top{display:flex;align-items:center;gap:18px;padding:22px 0 12px}
+.brand{display:flex;gap:12px;align-items:center}
+.brand .logo{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;font-size:21px;color:var(--accent);
+  background:linear-gradient(135deg,rgba(var(--acc),.32),rgba(var(--acc),.04));border:1px solid var(--card-b);box-shadow:var(--glow)}
+.brand b{display:block;font-size:19px;letter-spacing:-.01em}.brand small{color:var(--ink2);font-size:12px}
+.fresh{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--card-b);background:var(--card);border-radius:999px;
+  padding:5px 14px;font-size:12.5px;font-weight:600;color:var(--ink2)}
+.fresh .g{color:var(--st-good)} body.stale .fresh{border:2px solid var(--st-bad);color:var(--ink)} body.stale .fresh .g{color:var(--st-bad)}
+.sp{flex:1}
+.seg{display:inline-flex;padding:4px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--card-b);gap:2px}
+.seg button{font-weight:650;font-size:13px;color:var(--ink2);background:transparent;border:0;border-radius:9px;padding:7px 18px;cursor:pointer;
+  transition:background .25s,color .25s,box-shadow .25s}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed=true]{background:var(--accent);color:#06101f;box-shadow:0 4px 18px rgba(var(--acc),.45)}
+.seg .lbl{align-self:center;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);font-weight:700;padding:0 8px 0 6px}
+.ghost{font-weight:650;font-size:12.5px;color:var(--ink2);background:transparent;border:1px dotted var(--ink2);border-radius:10px;padding:8px 12px;cursor:pointer}
+.ghost[aria-pressed=true]{border:2px solid var(--st-bad);color:var(--ink)}
+nav.tabs{position:relative;display:flex;gap:4px;border-bottom:1px solid var(--grid);margin-bottom:22px}
+nav.tabs button{font-weight:650;font-size:15px;color:var(--ink2);background:none;border:0;padding:12px 20px 14px;cursor:pointer;transition:color .25s}
+nav.tabs button:hover{color:var(--ink)} nav.tabs button[aria-selected=true]{color:var(--ink)}
+nav.tabs .ink{position:absolute;bottom:-2px;height:3px;border-radius:3px;background:var(--accent);box-shadow:0 0 16px var(--accent);
+  transition:left .5s var(--ease),width .5s var(--ease)}
+.pane{display:none}.pane.on{display:block}
+.pane.on.from-r{animation:slideR .5s var(--ease) backwards}.pane.on.from-l{animation:slideL .5s var(--ease) backwards}
+@keyframes slideR{from{opacity:0;transform:translateX(44px)}}
+@keyframes slideL{from{opacity:0;transform:translateX(-44px)}}
+.rise{animation:rise .65s var(--ease) backwards;animation-delay:calc(var(--i,0) * 60ms)}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}}
+
+/* ---- glass cards + lift-and-glow (3A) with a springy return (2C) ---- */
+.card,.tile{position:relative;z-index:1;background:var(--card);border:1px solid var(--card-b);border-radius:var(--r);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);padding:18px 20px;
+  transition:transform .5s var(--spring),box-shadow .3s,border-color .3s}
+.card:hover,.tile:hover{transform:translateY(-4px);box-shadow:var(--glow);border-color:rgba(var(--acc),.62);z-index:5}
+.card:focus-within,.tile:focus-within{z-index:6}
+.ch{display:flex;align-items:center;gap:10px;margin-bottom:12px;min-height:22px}
+.ch h3{margin:0;font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2)}
+.ch .aside{margin-left:auto;font-size:12px;color:var(--ink3);text-align:right}
+.tag{font-size:11px;font-weight:700;border:1px dotted var(--ink2);color:var(--ink2);border-radius:6px;padding:1px 7px;white-space:nowrap}
+.tag.cons{border-style:solid;border-color:var(--grid2)}
+.pane>.card,.pane>section.card{margin-bottom:18px}
+.g2,.g3,.g4,.g-front2,.g-risk,.g-perf{display:grid;gap:18px;margin-bottom:18px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.g-front2{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}.g-risk{grid-template-columns:minmax(0,5fr) minmax(0,6fr)}
+.g-perf{grid-template-columns:minmax(0,7fr) minmax(0,5fr);align-items:start}
+.col{display:flex;flex-direction:column;gap:18px}
+.ec{width:100%}.h-90{height:90px}.h-200{height:200px}.h-300{height:300px}.h-320{height:320px}.h-400{height:400px}
+.h-420{height:420px}.h-440{height:440px}.h-460{height:460px}
+.ec-off{display:grid;place-items:center;color:var(--ink3);font-size:13px;border:1px dotted var(--ink3);border-radius:12px}
+.muted{color:var(--ink3)}
+
+/* ---- KPI tiles: count-up, shimmer, glow pulse ---- */
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:18px}
+.tile{padding:18px 22px 16px;min-height:168px}
+.tile .l{display:flex;align-items:center;gap:8px;font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);font-weight:750}
+.tile .l .tag{margin-left:auto;text-transform:none;letter-spacing:0}
+.tile .n{display:flex;align-items:baseline;gap:10px;font-weight:800;font-size:38px;line-height:1.1;letter-spacing:-.02em;margin:12px 0 6px;
+  animation:glowpulse 1.6s ease .7s backwards}
+.tile .n .arr{font-size:26px}
+.tile .n.await{font-size:22px;color:var(--ink2);border:1px dotted var(--ink3);border-radius:10px;padding:8px 12px;display:inline-flex;animation:none}
+.tile .d{font-size:13px;color:var(--ink2)}.tile .d b{color:var(--ink)}
+@keyframes glowpulse{0%{text-shadow:0 0 0 transparent}40%{text-shadow:0 0 22px var(--accent)}100%{text-shadow:0 0 0 transparent}}
+.shimmer{position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;
+  background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.13) 50%,transparent 70%);background-size:250% 100%;animation:shim 1.3s ease .35s}
+@keyframes shim{0%{opacity:1;background-position:120% 0}100%{opacity:1;background-position:-120% 0}}
+.ce-bar{display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px;background:var(--track);margin-top:10px}
+.ce-bar span{transform-origin:left;animation:grow 1.1s var(--ease) .35s backwards}
+.ce-bar .eq{background:var(--s1)}
+.ce-bar .ca{min-width:5px;background-color:var(--s6);background-image:repeating-linear-gradient(45deg,transparent 0 2px,rgba(7,10,20,.5) 2px 4px)}
+@keyframes grow{from{transform:scaleX(0)}}
+.ce-lab{display:flex;justify-content:space-between;font-size:12px;color:var(--ink2);margin-top:6px}.ce-lab b{color:var(--ink)}
+.help{position:relative;display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;border:1px solid var(--ink3);
+  color:var(--ink2);font-size:10.5px;font-weight:800;cursor:help;text-transform:none;letter-spacing:0;flex:none}
+.help:hover::after,.help:focus::after{content:attr(data-tip);position:absolute;left:-8px;top:26px;z-index:60;width:320px;padding:10px 12px;
+  border-radius:10px;background:var(--tip);border:1px solid var(--card-b);color:var(--ink);font:500 12.5px/1.5 Inter,sans-serif;
+  box-shadow:0 14px 34px rgba(0,0,0,.55);white-space:normal}
+.up{color:var(--st-good);font-weight:700;white-space:nowrap}.dn{color:var(--st-bad);font-weight:700;white-space:nowrap}
+.flat{color:var(--ink2);white-space:nowrap}
+
+/* ---- tier encoding: glyph + word + border style, never hue alone ---- */
+.tb{display:inline-flex;align-items:center;gap:5px;font-weight:800;font-size:11px;line-height:1.6;letter-spacing:.06em;padding:1px 8px;
+  border-radius:6px;white-space:nowrap;color:var(--ink)}
+.tb i{font-style:normal}
+.t-act{border:2px solid var(--st-bad)}.t-act i{color:var(--st-bad)}
+.t-rev{border:2px dashed var(--st-watch)}.t-rev i{color:var(--st-watch)}
+.t-fyi{border:2px dotted var(--st-neutral)}.t-fyi i{color:var(--st-neutral)}
+.st{font-size:11.5px;font-weight:800;letter-spacing:.04em;margin-left:auto;padding:1px 8px;border-radius:6px;white-space:nowrap}
+.st-watch{border:2px dashed var(--st-watch)}.st-good{border:1px solid var(--st-good)}.st-neutral{border:2px dotted var(--st-neutral)}
+
+/* ---- sunburst + legend ---- */
+.sun{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:14px;align-items:center}
+.sunlg{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.sunlg li{display:grid;grid-template-columns:16px 1fr auto;gap:10px;align-items:start;padding:6px 8px;border-radius:9px;cursor:default;
+  transition:background .2s}
+.sunlg li:hover{background:rgba(255,255,255,.06)}
+.sunlg .nm{font-size:13px;font-weight:650;line-height:1.3}.sunlg small{display:block;color:var(--ink3);font-weight:500;font-size:11.5px}
+.sunlg b{font-size:13px}
+.sw{width:16px;height:16px;border-radius:4px;background-color:var(--c);margin-top:1px}
+.sw1{background-image:repeating-linear-gradient(45deg,transparent 0 3px,rgba(7,10,20,.5) 3px 5px)}
+.sw2{background-image:radial-gradient(rgba(7,10,20,.6) 1.4px,transparent 1.7px);background-size:5px 5px}
+.sw3{background-image:repeating-linear-gradient(-45deg,transparent 0 3px,rgba(7,10,20,.5) 3px 5px)}
+.sw4{background-image:radial-gradient(rgba(7,10,20,.6) 2.1px,transparent 2.5px);background-size:8px 8px}
+.sw5{background-image:repeating-linear-gradient(0deg,transparent 0 3px,rgba(7,10,20,.5) 3px 5px)}
+.sw6{background-image:linear-gradient(45deg,rgba(7,10,20,.45) 25%,transparent 25% 75%,rgba(7,10,20,.45) 75%);background-size:7px 7px}
+
+/* ---- calendar ---- */
+.cal-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.cal-nav button{width:34px;height:34px;border-radius:10px;border:1px solid var(--card-b);background:var(--card);color:var(--ink);font-size:18px;cursor:pointer;
+  transition:transform .4s var(--spring),box-shadow .25s}
+.cal-nav button:hover:not(:disabled){transform:translateY(-2px);box-shadow:var(--glow)}
+.cal-nav button:disabled{opacity:.3;cursor:default}
+.cal-lg{display:flex;gap:16px;align-items:center;font-size:12px;color:var(--ink2);margin-left:auto}
+.cal-months{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.mh{font-weight:800;font-size:16px;margin:0 0 8px}
+.cg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.dow{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;padding:0 6px 2px;font-weight:700}
+.cd{min-height:96px;border-radius:10px;padding:5px 6px;background:rgba(255,255,255,.03);border:1px solid rgba(140,170,255,.08);
+  display:flex;flex-direction:column;gap:3px;min-width:0;transition:background .2s,border-color .2s}
+.cd:hover{background:rgba(255,255,255,.07);border-color:rgba(var(--acc),.4)}
+.cd.blank{background:transparent;border-color:transparent}
+.cd.past{opacity:.42}.cd.we{background:rgba(255,255,255,.012)}
+.cd .dnum{font-size:12px;font-weight:700;color:var(--ink2)}
+.cd.today{border:2px solid var(--accent);box-shadow:0 0 18px rgba(var(--acc),.35);opacity:1}
+.cd.today .dnum::after{content:"  TODAY";color:var(--accent);font-size:10px;letter-spacing:.08em}
+.ev{display:flex;align-items:center;gap:4px;font-weight:700;font-size:11.5px;line-height:1.55;border-radius:6px;padding:0 6px;white-space:nowrap;
+  overflow:hidden;min-width:0}
+.ev small{margin-left:auto;font-weight:600;color:var(--ink2);font-size:10.5px}
+.ev-e{background:rgba(var(--acc),.2);border:1.5px solid var(--accent)}
+.ev-x{border:1.5px dashed var(--ink2)}
+.ev-p{border:1.5px dotted var(--ink2);color:var(--ink2)}
+.ev-more{font-size:11px;color:var(--ink3);padding-left:4px}
+
+/* ---- Needs you: strip + kanban ---- */
+.needs{margin-top:30px}
+.sh{font-size:22px;margin:0 0 12px;letter-spacing:-.01em}
+.strip{display:flex;align-items:center;gap:18px;padding:14px 20px;margin-bottom:16px}
+.sx{display:flex;align-items:center;gap:10px;padding-right:20px;border-right:1px solid var(--grid)}
+.sx b{font-size:26px;font-weight:800;line-height:1}.sx .k{font-size:12px;color:var(--ink2)}
+.sx.note{border:0;color:var(--ink3);font-size:12.5px;margin-left:auto;padding-right:0}
+.kanban{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:start}
+.kcol{border-radius:var(--r);padding:14px;background:rgba(8,14,32,.34);backdrop-filter:blur(6px);border:1px solid var(--card-b)}
+.kcol>header{display:flex;align-items:center;gap:10px;padding:2px 4px 12px;margin-bottom:12px}
+.k-act>header{border-bottom:3px solid var(--st-bad)}.k-rev>header{border-bottom:3px dashed var(--st-watch)}
+.k-fyi>header{border-bottom:3px dotted var(--st-neutral)}
+.kcol .cnt{margin-left:auto;font-size:22px;font-weight:800}
+.qc{position:relative;background:var(--card);border:1px solid var(--card-b);border-radius:12px;padding:12px 14px 10px;margin-bottom:10px;
+  transition:transform .45s var(--spring),box-shadow .3s,border-color .3s}
+.qc:hover{transform:translateY(-3px);box-shadow:var(--glow);border-color:rgba(var(--acc),.55)}
+.qc-act{border-left:5px solid var(--st-bad)}.qc-rev{border-left:5px dashed var(--st-watch)}.qc-fyi{border-left:5px dotted var(--st-neutral)}
+.qc header{display:flex;gap:8px;align-items:baseline}.qc .lab{font-size:16px}
+.qc .kind{font-size:10.5px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;font-weight:750}
+.qc .since{margin-left:auto;font-size:11.5px;color:var(--ink3)}
+.qc .what{margin:6px 0;font-size:13.5px}
+.qc details summary{cursor:pointer;color:var(--accent);font-size:12.5px;font-weight:650;list-style:none}
+.qc details summary::before{content:"▸ ";display:inline-block;transition:transform .3s}
+.qc details[open] summary::before{transform:rotate(90deg)}
+.qc .sig{border-top:1px solid var(--grid);padding-top:6px;margin-top:6px;font-size:13px;color:var(--ink2)}.qc .sig p{margin:3px 0}
+.qc .sig b{color:var(--ink)}
+.kempty{color:var(--ink3);font-size:13px;padding:4px 6px 8px;line-height:1.55}
+.chips{margin:4px 0 2px}
+.chip{display:inline-block;font-size:11.5px;font-weight:700;border:1px solid var(--card-b);border-radius:6px;padding:0 7px;margin:3px 4px 0 0;
+  background:rgba(255,255,255,.04)}
+
+/* ---- gauges ---- */
+.gauge{padding-bottom:14px}
+.gauge .gsub{font-size:12.5px;color:var(--ink2);text-align:center;margin-top:-4px;min-height:38px}
+.gauge .gsub b{color:var(--ink)}
+.fgh{display:flex;justify-content:center;gap:16px;font-size:12px;color:var(--ink2);margin-top:4px}.fgh b{color:var(--ink)}
+
+/* ---- tables ---- */
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);font-weight:750;text-align:left;padding:8px 10px;
+  border-bottom:1px solid var(--grid2);white-space:nowrap}
+.tbl th.n,.tbl td.n{text-align:right}
+.gk{text-transform:none;font-size:1.15em}
+.tbl td{padding:8px 10px;border-bottom:1px solid var(--grid);vertical-align:middle}
+.tbl td small{display:block;color:var(--ink3);font-size:11.5px}
+.tbl tbody tr{transition:background .2s}.tbl tbody tr:hover{background:rgba(255,255,255,.045)}
+.tbl th[data-sort]{cursor:pointer}.tbl th[data-sort]:hover{color:var(--ink)}.tbl th .sa{color:var(--accent)}
+.acct{font-size:10.5px;font-weight:750;letter-spacing:.05em;border:1px solid var(--grid2);border-radius:5px;padding:0 5px;color:var(--ink2);margin-left:6px}
+.flag{display:inline-block;font-size:11px;font-weight:700;color:var(--ink2);border:1px dotted var(--ink2);border-radius:5px;padding:0 5px;
+  margin:1px 4px 1px 0;white-space:nowrap}
+tr.hr{cursor:pointer}
+tr.hr td:first-child::before{content:"▸";color:var(--ink3);margin-right:8px;display:inline-block;transition:transform .3s var(--ease)}
+tr.hr.open td:first-child::before{transform:rotate(90deg);color:var(--accent)}
+tr.hr.open td{background:rgba(var(--acc),.07)}
+tr.hd{display:none}tr.hd.open{display:table-row}
+tr.hd>td{background:rgba(255,255,255,.028);padding:16px 18px 18px}
+.hdg{display:grid;grid-template-columns:280px 1fr 1fr 1.15fr 1.5fr;gap:24px;animation:rise .45s var(--ease) backwards}
+.hdg h4{margin:0 0 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:13px}.kv span{color:var(--ink3)}
+.perf-top{display:flex;align-items:center;gap:20px;margin-bottom:18px}
+.psum{display:flex;gap:26px;font-size:13px;color:var(--ink2)}.psum b{display:block;font-size:22px;color:var(--ink);font-weight:800}
+.mult{font-size:12px;line-height:1.5;white-space:nowrap}
+footer.foot{font-size:12px;color:var(--ink3);border-top:1px solid var(--grid);padding-top:12px;margin-top:20px}
+
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.gate{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(4,7,16,.7)}
+.gate[hidden]{display:none}.gate form{width:min(520px,92vw);padding:26px 28px;display:grid;gap:12px}
+.gate h3{margin:0;font-size:20px}.gate label{display:grid;gap:6px;font-size:12.5px;font-weight:700;color:var(--ink2)}
+.gate input{font:inherit;font-size:14px;padding:10px 12px;border-radius:10px;border:1px solid var(--card-b);background:rgba(255,255,255,.04);color:var(--ink)}
+.gate-msg{min-height:1.2em;margin:0;color:var(--st-bad);font-weight:600}.gate-row{display:flex;gap:10px}
+.gate button{font:inherit;font-weight:750;padding:9px 16px;border-radius:10px;border:1px solid var(--accent);background:rgba(var(--acc),.18);color:var(--ink);cursor:pointer}
+.gate button.ghost{border-color:var(--card-b);background:none}
+</style>
+</head>
+<body>
+<div id="gate" class="gate" hidden><form id="gate-form" class="card"><h3>Portfolio cockpit</h3>
+<p class="muted">This page holds no data. It reads your private data repo with a fine-grained <b>read-only</b> GitHub token, kept only in this browser.</p>
+<label>Data repo (owner/name)<input id="gate-repo" autocomplete="off" spellcheck="false" required></label>
+<label>Read-only token<input id="gate-token" type="password" autocomplete="off" spellcheck="false" required></label>
+<p id="gate-msg" class="gate-msg" role="alert"></p>
+<div class="gate-row"><button type="submit">Open the cockpit</button><button type="button" id="gate-forget" class="ghost">Forget token</button></div></form></div>
+<canvas id="bg" aria-hidden="true"></canvas>
+<div class="ind-banner">◇ <b>INDICATIVE PROTOTYPE</b> <span id="ind-note"></span></div>
+<div class="stale-banner" role="alert"><b>■ STALE</b> <span id="stale-text"></span></div>
+<div class="wrap">
+<header class="top">
+  <div class="brand"><span class="logo">◈</span><div><b>Portfolio cockpit</b><small>v2 prototype · desktop 1920 × 1080</small></div></div>
+  <div id="fresh" class="fresh"></div>
+  <span class="sp"></span>
+  <div class="seg" role="group" aria-label="Account"><span class="lbl">Account</span><button data-scope="ISA">ISA</button><button data-scope="Invest">Invest</button><button data-scope="All">All</button></div>
+  <button class="ghost" data-act="stale" aria-pressed="false" title="Preview what a stale build looks like">◇ Stale preview</button>
+</header>
+<nav class="tabs" role="tablist">
+  <button role="tab" data-tab="front">Front</button><button role="tab" data-tab="alloc">Allocation &amp; Risk</button>
+  <button role="tab" data-tab="perf">Performance</button><button role="tab" data-tab="val">Valuation board</button>
+  <button role="tab" data-tab="hold">Holdings</button><span class="ink"></span>
+</nav>
+<main>
+  <section class="pane" data-pane="front"></section><section class="pane" data-pane="alloc"></section>
+  <section class="pane" data-pane="perf"></section><section class="pane" data-pane="val"></section>
+  <section class="pane" data-pane="hold"></section>
+</main>
+<footer class="foot" id="foot"></footer>
+</div>
+<script id="cockpit-data" type="application/json"></script>
+<script>window.__cockpit = function(){
+(function(){
+'use strict';
+const DATA = JSON.parse(document.getElementById('cockpit-data').textContent);
+const PAL = {"series": ["#0072B2", "#D55E00", "#A276FC", "#009E73", "#F0E442", "#56B4E9", "#E69F00"], "status": {"GOOD": "#7AFFBF", "WATCH": "#D3C0B7", "BAD": "#FE6AB2", "NEUTRAL": "#EDFEFF"}, "accent": "#56B4E9", "page": "#070a14", "ink": "#eef2ff", "ink2": "#a9b4d6", "ink3": "#7d89ad", "card": "rgba(8,14,32,.36)", "card_b": "rgba(120,170,255,.22)", "grid": "rgba(160,180,255,.10)", "grid2": "rgba(160,180,255,.24)", "track": "rgba(255,255,255,.08)", "tip": "rgba(14,20,40,.96)"};
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const TABS = ['front','alloc','perf','val','hold'];
+const TIER = {act:['■','ACT NOW','act'], review:['▲','REVIEW','rev'], fyi:['◇','FYI','fyi']};
+const st = {scope:'All', tab:'front', stale:false, cal:0, range:'1Y', rsort:['rc',-1], hsort:['value',-1]};
+const S = () => DATA.scopes[st.scope];
+const BAR = DATA.meta.double_bar, TODAY = DATA.meta.today;
+// Live data (Phase 4) vs the indicative prototype: the captions below that only made sense on
+// placeholder data switch on this flag. Copy only; layout, style and charts are the same.
+const IND = !!DATA.meta.indicative, SRC = IND ? '✓ T212' : '✓ ledger', ind = (proto, live) => IND ? proto : live;
+const closeValue = s => { const a = s.perf.ranges.YTD.actual; return a[a.length - 1]; };
+
+/* ------------------------------ formatting ------------------------------ */
+const MINUS = '−';
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function gbp(v, dp=0, sign=false){ if(v==null||isNaN(v)) return '–';
+  const a = Math.abs(v).toLocaleString('en-GB',{minimumFractionDigits:dp,maximumFractionDigits:dp});
+  return (v<0 ? MINUS : (sign ? '+' : '')) + '£' + a; }
+function gbpk(v, sign=false){ if(v==null||isNaN(v)) return '–'; const a = Math.abs(v);
+  const s = a>=1e6 ? (a/1e6).toFixed(2)+'m' : a>=1e4 ? (a/1e3).toFixed(1)+'k' : a>=1e3 ? (a/1e3).toFixed(2)+'k' : a.toFixed(0);
+  return (v<0 ? MINUS : (sign ? '+' : '')) + '£' + s; }
+function pct(v, dp=1, sign=true){ if(v==null||isNaN(v)) return '–';
+  return (v<0 ? MINUS : (sign && v>0 ? '+' : '')) + (Math.abs(v)*100).toFixed(dp) + '%'; }
+function mv(v, txt, eps=1e-9){ if(v==null||isNaN(v)) return '<span class="flat">–</span>';
+  if(Math.abs(v) < eps) return `<span class="flat">→ ${txt}</span>`;
+  return v>0 ? `<span class="up">↑ ${txt}</span>` : `<span class="dn">↓ ${txt}</span>`; }
+const arrow = v => v>0 ? '<span class="arr up">↑</span>' : v<0 ? '<span class="arr dn">↓</span>' : '<span class="arr flat">→</span>';
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const pd = s => { const [y,m,d] = s.split('-').map(Number); return new Date(Date.UTC(y, m-1, d)); };
+const iso = d => d.toISOString().slice(0,10);
+const dShort = s => { const d = pd(s); return `${d.getUTCDate()} ${MON[d.getUTCMonth()]}`; };
+const dNice = s => { const d = pd(s); return `${DOW[d.getUTCDay()]} ${d.getUTCDate()} ${MON[d.getUTCMonth()]}`; };
+const dLong = s => { const d = pd(s); return `${d.getUTCDate()} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()}`; };
+const days = (a, b) => Math.round((pd(b) - pd(a)) / 864e5);
+const CCY = {USD:'$', GBP:'£', GBX:'£', EUR:'€'};
+const px = (v, c) => v==null ? '–' : (CCY[c]||'') + Number(v).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
+const num = (v, dp=2) => v==null||isNaN(v) ? '–' : (v<0 ? MINUS : '') + Math.abs(v).toFixed(dp);
+const pp = v => v==null ? '–' : (v<0 ? MINUS : '+') + (Math.abs(v)*100).toFixed(1) + 'pp';
+function hexA(h, a){ const n = parseInt(h.slice(1), 16); return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`; }
+const tb = (t, short) => { const [g,w,c] = TIER[t]; return `<span class="tb t-${c}"><i>${g}</i> ${short ? w.split(' ')[0] : w}</span>`; };
+const tag = (txt, cls='') => `<span class="tag ${cls}">${txt}</span>`;
+const AWAIT = what => `<div class="n await">◇ awaiting T212</div><div class="d">Needs the ${esc(what)}. The back-cast estimate was wrong, so it is no longer shown.</div>`;
+const help = t => `<span class="help" tabindex="0" data-tip="${esc(t)}">?</span>`;
+const FMT = {gbp:v=>gbp(v), gbps:v=>gbp(v,0,true), gbps2:v=>gbp(v,2,true), pct:v=>pct(v), int:v=>String(Math.round(v))};
+
+/* ------------------------------ ONE chart wrapper ------------------------------ */
+// Every chart goes through Chart.mount(): the report_html palette, glass tooltip,
+// Inter, motion on/off and (for part-to-whole) aria.decal patterns live here only.
+const DK = 'rgba(7,10,20,0.5)';
+const DECALS = [
+  {symbol:'none'},
+  {symbol:'rect', dashArrayX:[1,0], dashArrayY:[3,4], rotation:Math.PI/4, color:DK},
+  {symbol:'circle', symbolSize:0.7, dashArrayX:[4,4], dashArrayY:[4,4], color:DK},
+  {symbol:'rect', dashArrayX:[1,0], dashArrayY:[3,4], rotation:-Math.PI/4, color:DK},
+  {symbol:'circle', symbolSize:0.9, dashArrayX:[7,7], dashArrayY:[7,7], color:DK},
+  {symbol:'rect', dashArrayX:[1,0], dashArrayY:[3,4], rotation:0, color:DK},
+  {symbol:'diamond', symbolSize:0.9, dashArrayX:[7,7], dashArrayY:[7,7], color:DK},
+];
+const isObj = o => o && typeof o === 'object' && !Array.isArray(o);
+function merge(a, b){ const o = Object.assign({}, a);
+  for(const k in b){ o[k] = isObj(a[k]) && isObj(b[k]) ? merge(a[k], b[k]) : b[k]; } return o; }
+const Chart = (() => {
+  const ok = typeof echarts !== 'undefined';
+  const base = () => ({
+    backgroundColor:'transparent', color:PAL.series,
+    textStyle:{fontFamily:'Inter, system-ui, sans-serif', color:PAL.ink2, fontSize:12},
+    animation:!RM, animationDuration:1100, animationEasing:'cubicOut', animationDurationUpdate:650,
+    aria:{enabled:true},
+    tooltip:{confine:true, backgroundColor:PAL.tip, borderColor:PAL.card_b, borderWidth:1, padding:[8,12],
+      textStyle:{color:PAL.ink, fontFamily:'Inter, sans-serif', fontSize:12.5},
+      extraCssText:'border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.5);'},
+  });
+  function mount(el, option, o={}){
+    if(!ok){ el.classList.add('ec-off'); el.textContent = '◇ chart engine not loaded (offline?) — numbers are in the tables'; return null; }
+    const old = echarts.getInstanceByDom(el); if(old) old.dispose();
+    const c = echarts.init(el, null, {renderer:'canvas'});
+    let opt = merge(base(), option);
+    if(o.decal) opt.aria = {enabled:true, decal:{show:true, decals:DECALS}};
+    c.setOption(opt);
+    return c;
+  }
+  function update(c, option){ if(c) c.setOption(merge(base(), option), true); }
+  function disposeIn(root){ if(!ok) return; root.querySelectorAll('.ec').forEach(el => { const c = echarts.getInstanceByDom(el); if(c) c.dispose(); }); }
+  window.addEventListener('resize', () => { if(!ok) return; document.querySelectorAll('.ec').forEach(el => { const c = echarts.getInstanceByDom(el); if(c) c.resize(); }); });
+  return {mount, update, disposeIn, ok};
+})();
+const AX = o => merge({axisLine:{lineStyle:{color:PAL.grid2}}, axisTick:{show:false}, axisLabel:{color:PAL.ink2, fontSize:11.5},
+  splitLine:{lineStyle:{color:PAL.grid}}, nameTextStyle:{color:PAL.ink2, fontWeight:700, fontSize:11.5}}, o||{});
+const LBL = {color:'#fff', fontWeight:800, textBorderColor:'rgba(7,10,20,.88)', textBorderWidth:3, fontFamily:'Inter, sans-serif'};
+
+/* deferred mounts: renderers return HTML and queue the chart for after insertion */
+let pending = [], uid = 0;
+function slot(fn, cls='', style=''){ const id = 'ec' + (++uid); pending.push([id, fn]);
+  return `<div class="ec ${cls}" id="${id}" style="${style}"></div>`; }
+function flush(){ const p = pending; pending = []; p.forEach(([id, fn]) => { const el = document.getElementById(id); if(el) fn(el); }); }
+const card = (title, body, o={}) => `<section class="card rise ${o.cls||''}" ${o.id?`id="${o.id}"`:''}><header class="ch"><h3>${title}</h3>${o.tags||''}<span class="aside">${o.aside||''}</span></header>${body}</section>`;
+
+/* ------------------------------ chart options ------------------------------ */
+function sunOpt(nodes, center){
+  const data = nodes.map((n, i) => ({
+    name:n.name, value:+(n.value*100).toFixed(2),
+    itemStyle:{color:PAL.series[i]},
+    children:n.children.map((k, j) => ({name:k.name, value:+(k.value*100).toFixed(2),
+      itemStyle:{color:PAL.series[i], opacity:Math.max(.4, 1 - j*.13)},
+      label:{show:k.value >= 0.05}}))}));
+  return {
+    tooltip:{trigger:'item', formatter:p => { const path = p.treePathInfo.map(x => x.name).filter(Boolean);
+      return `<b>${esc(p.name)}</b> · ${p.value.toFixed(1)}%` + (path.length > 1 ? `<br><span style="color:${PAL.ink2}">${esc(path[0])}</span>` : ''); }},
+    series:[{type:'sunburst', data, radius:['19%','97%'], center:['50%','50%'], sort:null, nodeClick:false,
+      itemStyle:{borderColor:'rgba(9,13,28,.95)', borderWidth:2, borderRadius:3},
+      emphasis:{focus:'ancestor', itemStyle:{shadowBlur:20, shadowColor:hexA(PAL.accent,.6)}},
+      // Inner ring prints the sector % (names overflow narrow slices); the legend
+      // beside it prints the same %, so ring ↔ legend never relies on colour.
+      levels:[{}, {r0:'19%', r:'55%', label:Object.assign({rotate:0, fontSize:14, minAngle:10, formatter:p => p.value.toFixed(1) + '%'}, LBL)},
+        {r0:'56.5%', r:'97%', label:Object.assign({rotate:'radial', fontSize:11.5, formatter:p => `${p.name} ${p.value.toFixed(1)}%`}, LBL)}]}],
+    graphic:[{type:'text', left:'center', top:'middle', silent:true, style:{text:center, fill:PAL.ink, font:'800 15px Inter, sans-serif', textAlign:'center', textVerticalAlign:'middle'}}],
+  };
+}
+function donutOpt(items, center){
+  return {
+    tooltip:{trigger:'item', formatter:p => `<b>${esc(p.name)}</b> · ${p.value.toFixed(1)}%`},
+    series:[{type:'pie', radius:['48%','72%'], center:['50%','52%'], padAngle:2, minAngle:3, avoidLabelOverlap:true,
+      itemStyle:{borderRadius:5, borderColor:'rgba(9,13,28,.8)', borderWidth:1},
+      label:{color:PAL.ink, fontWeight:750, fontSize:12, formatter:p => `${p.name}\n{v|${p.value.toFixed(1)}%}`, rich:{v:{color:PAL.ink2, fontSize:11.5, fontWeight:600, padding:[3,0,0,0]}}},
+      labelLine:{length:12, length2:10, lineStyle:{color:PAL.ink3}},
+      emphasis:{scale:true, scaleSize:7},
+      data:items.map((x, i) => ({name:x.name, value:+(x.value*100).toFixed(2), itemStyle:{color:PAL.series[i%7], decal:DECALS[i%7]}}))}],
+    graphic:[{type:'text', left:'center', top:'52%', silent:true, style:{text:center, fill:PAL.ink, font:'800 15px Inter, sans-serif', textAlign:'center', textVerticalAlign:'middle'}}],
+  };
+}
+const side = (rows, key) => { const o = [...rows].sort((a, b) => a[key] - b[key]); return r => o.indexOf(r) % 2 ? 'left' : 'right'; };
+function lineArea(color){ return {color:{type:'linear', x:0, y:0, x2:0, y2:1, colorStops:[{offset:0, color:hexA(color,.38)}, {offset:1, color:hexA(color,0)}]}}; }
+function valueLineOpt(v){
+  return {
+    grid:{left:66, right:96, top:20, bottom:30},
+    tooltip:{trigger:'axis', formatter:p => `${dNice(p[0].value[0])}<br><b>${gbp(p[0].value[1])}</b>`},
+    xAxis:AX({type:'time', splitLine:{show:false}, axisLabel:{formatter:'{MMM} {yy}'}}),
+    yAxis:AX({type:'value', scale:true, axisLine:{show:false}, axisLabel:{formatter:x => gbpk(x)}}),
+    series:[{type:'line', showSymbol:false, data:v.dates.map((d, i) => [d, v.values[i]]),
+      lineStyle:{width:2.6, color:PAL.series[0]}, itemStyle:{color:PAL.series[0]}, areaStyle:lineArea(PAL.series[0]),
+      endLabel:{show:true, formatter:p => gbpk(p.value[1]), color:PAL.ink, fontWeight:800, fontSize:13, distance:8}}],
+  };
+}
+function gaugeOpt(g){
+  const common = {type:'gauge', startAngle:210, endAngle:-30, min:0, max:g.max, center:['50%','60%'],
+    axisTick:{show:false}, splitLine:{show:false}, axisLabel:{show:false}, pointer:{show:false}, anchor:{show:false}, title:{show:false}};
+  const val = Math.min(g.value, g.max);
+  const series = [Object.assign({}, common, {radius:'86%',
+    progress:{show:true, width:16, roundCap:true, itemStyle:{color:g.color||PAL.series[0], shadowBlur:14, shadowColor:hexA(g.color||PAL.series[0],.55)}},
+    axisLine:{roundCap:true, lineStyle:{width:16, color:[[1, PAL.track]]}},
+    detail:{valueAnimation:!RM, offsetCenter:[0,'6%'], fontSize:30, fontWeight:800, fontFamily:'Inter, sans-serif', color:PAL.ink,
+      formatter:x => g.fmt(g.value > g.max ? g.value : x)},
+    data:[{value:val}]})];
+  if(g.marker != null){ const f = Math.min(1, g.marker/g.max), e = .007;
+    series.push(Object.assign({}, common, {radius:'97%', silent:true, animation:false, progress:{show:false}, detail:{show:false},
+      axisLine:{lineStyle:{width:32, color:[[Math.max(0,f-e),'rgba(0,0,0,0)'], [Math.min(1,f+e), PAL.ink], [1,'rgba(0,0,0,0)']]}}, data:[{value:0}]})); }
+  return {series};
+}
+const fgWord = v => v < 25 ? 'EXTREME FEAR' : v < 45 ? 'FEAR' : v <= 55 ? 'NEUTRAL' : v <= 75 ? 'GREED' : 'EXTREME GREED';
+function fgOpt(v){
+  const a = 'rgba(255,255,255,.07)', b = 'rgba(255,255,255,.15)', g = 'rgba(0,0,0,0)';
+  return {series:[{type:'gauge', startAngle:210, endAngle:-30, min:0, max:100, radius:'74%', center:['50%','62%'], splitNumber:20,
+    axisLine:{lineStyle:{width:16, color:[[.245,a],[.255,g],[.445,b],[.455,g],[.545,a],[.555,g],[.745,b],[.755,g],[1,a]]}},
+    progress:{show:false}, axisTick:{show:false}, splitLine:{show:false},
+    axisLabel:{distance:-50, color:PAL.ink2, fontSize:10, fontWeight:750,
+      formatter:x => ({10:'EXT.\nFEAR', 35:'FEAR', 50:'NEUTRAL', 65:'GREED', 90:'EXT.\nGREED'})[Math.round(x)] || ''},
+    pointer:{show:true, length:'64%', width:5, itemStyle:{color:PAL.ink}}, anchor:{show:true, size:13, itemStyle:{color:PAL.ink, borderColor:PAL.accent, borderWidth:2}},
+    title:{show:false},
+    detail:{valueAnimation:!RM, offsetCenter:[0,'38%'], formatter:x => `{n|${Math.round(x)}}  {w|${fgWord(x)}}`,
+      rich:{n:{fontSize:28, fontWeight:800, color:PAL.ink, fontFamily:'Inter, sans-serif'}, w:{fontSize:12, fontWeight:800, color:PAL.ink2, fontFamily:'Inter, sans-serif'}}},
+    data:[{value:v}]}]};
+}
+function riskScatterOpt(s){
+  const rows = s.risk.rows.filter(r => r.rc != null);
+  const ORDER = ['USD','GBP','EUR (NOK risk)'], present = new Set(rows.map(r => r.cur));
+  const curs = ORDER.filter(c => present.has(c)).concat([...present].filter(c => !ORDER.includes(c))), SYM = ['circle','rect','triangle','diamond'];
+  const M = Math.ceil((Math.max(...rows.map(r => Math.max(r.w, r.rc))) * 100 + 3) / 5) * 5;
+  return {
+    grid:{left:60, right:28, top:44, bottom:52},
+    legend:{top:0, right:0, textStyle:{color:PAL.ink2}, itemWidth:12, itemHeight:12},
+    tooltip:{trigger:'item', formatter:p => { const r = p.data.r; return `<b>${r.t}</b> · ${esc(r.cur)}<br>weight ${pct(r.w,1,false)} · risk share ${pct(r.rc,1,false)}<br>β ${num(r.beta)} · vol ${pct(r.vol,0,false)}`; }},
+    xAxis:AX({type:'value', name:'Weight (% of book)', nameLocation:'middle', nameGap:32, min:0, max:M, axisLabel:{formatter:'{value}%'}}),
+    yAxis:AX({type:'value', name:'Share of portfolio risk', nameLocation:'middle', nameGap:40, min:0, max:M, axisLabel:{formatter:'{value}%'}}),
+    series:curs.map((c, k) => { const i = ORDER.includes(c) ? ORDER.indexOf(c) : k; return {name:c, type:'scatter', symbol:SYM[i%4], symbolSize:14, labelLayout:{moveOverlap:'shiftY'},
+      itemStyle:{color:PAL.series[i], borderColor:'rgba(7,10,20,.85)', borderWidth:1.2}, emphasis:{scale:1.6},
+      data:rows.filter(r => r.cur === c).map(r => ({value:[r.w*100, r.rc*100], r,
+        label:{show:r.w >= .04 || r.rc >= .05, formatter:r.t, position:'right', color:PAL.ink, fontWeight:750, fontSize:11.5}})),
+      markLine:k ? undefined : {silent:true, symbol:'none', lineStyle:{color:PAL.ink2, type:'dashed', width:1.5},
+        label:{formatter:'risk share = weight', color:PAL.ink2, position:'insideMiddleTop'}, data:[[{coord:[0,0]}, {coord:[M,M]}]]}}; }),
+  };
+}
+function rangeKey(s){ return st.range === '5Y' ? 'Max' : st.range; }
+function perfOpt(s){
+  const R = s.perf.ranges[rangeKey(s)];
+  const pts = k => R.dates.map((d, i) => [d, R[k][i]]);
+  return {
+    grid:{left:72, right:150, top:44, bottom:32},
+    legend:{top:0, left:0, textStyle:{color:PAL.ink, fontWeight:650}, itemWidth:34},
+    tooltip:{trigger:'axis', formatter:p => { const a = p[0].value[1], b = p[1] ? p[1].value[1] : null;
+      return `${dNice(p[0].value[0])}<br>You <b>${gbp(a)}</b><br>VWRP, same deposits <b>${gbp(b)}</b><br>Gap ${mv(a-b, gbp(a-b,0,true))}`; }},
+    xAxis:AX({type:'time', splitLine:{show:false}, axisLabel:{formatter:'{MMM} {yy}'}}),
+    yAxis:AX({type:'value', scale:true, axisLine:{show:false}, axisLabel:{formatter:x => gbpk(x)}}),
+    series:[
+      {name:'Your portfolio', type:'line', showSymbol:false, data:pts('actual'), lineStyle:{width:2.8, color:PAL.series[0]}, itemStyle:{color:PAL.series[0]},
+        areaStyle:{color:hexA(PAL.series[0], .08)}, endLabel:{show:true, formatter:p => `You ${gbpk(p.value[1])}`, color:PAL.ink, fontWeight:800, distance:8}},
+      {name:'VWRP bought with the same deposits', type:'line', showSymbol:false, data:pts('vwrp'), lineStyle:{width:2.8, type:[8,5], color:PAL.series[1]},
+        itemStyle:{color:PAL.series[1]}, endLabel:{show:true, formatter:p => `VWRP ${gbpk(p.value[1])}`, color:PAL.ink, fontWeight:800, distance:8}}],
+  };
+}
+function wfOpt(sp){
+  const parts = [['Capital (prices)', sp.capital], ['FX (sterling)', sp.fx], ['Dividends · 12m' + (IND ? ' ◇' : ''), sp.dividends]];
+  let run = 0; const rows = parts.map(([n, v]) => { const r = [n, Math.min(run, run+v), Math.max(run, run+v), v, 0]; run += v; return r; });
+  rows.push(['Total', Math.min(0, run), Math.max(0, run), run, 1]);
+  return {
+    grid:{left:70, right:20, top:34, bottom:34},
+    tooltip:{trigger:'item', formatter:p => `${rows[p.dataIndex][0]}: <b>${gbp(rows[p.dataIndex][3],0,true)}</b>`},
+    xAxis:AX({type:'category', data:rows.map(r => r[0]), axisLabel:{color:PAL.ink, fontWeight:650}}),
+    yAxis:AX({type:'value', axisLine:{show:false}, axisLabel:{formatter:x => gbpk(x)}}),
+    series:[{type:'custom', data:rows.map((r, i) => [i, r[1], r[2]]), encode:{x:0, y:[1,2]},
+      renderItem:(params, api) => { const r = rows[params.dataIndex], i = api.value(0);
+        const top = api.coord([i, r[2]]), bot = api.coord([i, r[1]]), w = api.size([1,0])[0] * .5;
+        const col = r[4] ? PAL.series[2] : PAL.series[0];
+        return {type:'group', children:[
+          {type:'rect', shape:{x:top[0]-w/2, y:top[1], width:w, height:Math.max(2, bot[1]-top[1]), r:5},
+            style:{fill:col}, emphasis:{style:{shadowBlur:16, shadowColor:hexA(PAL.accent,.6)}}},
+          {type:'text', silent:true, style:{text:(r[3] >= 0 ? '↑ ' : '↓ ') + gbp(r[3],0,true), x:top[0], y:r[3] >= 0 ? top[1]-8 : bot[1]+8,
+            textAlign:'center', textVerticalAlign:r[3] >= 0 ? 'bottom' : 'top', fill:PAL.ink, font:'800 13px Inter, sans-serif'}}]}; }}],
+  };
+}
+function ctOpt(list){
+  return {
+    grid:{left:64, right:96, top:6, bottom:24},
+    tooltip:{trigger:'item', formatter:p => `<b>${esc(p.name)}</b>: ${gbp(p.value,0,true)}`},
+    xAxis:AX({type:'value', min:v => Math.min(0, v.min * 1.45), max:v => Math.max(0, v.max * 1.45),
+      axisLabel:{formatter:x => gbpk(x), showMinLabel:false, showMaxLabel:false}}),
+    yAxis:AX({type:'category', inverse:true, data:list.map(x => x[0]), axisLabel:{color:PAL.ink, fontWeight:700}, axisLine:{show:false}}),
+    series:[{type:'bar', barWidth:'64%', animationDelay:i => i*28,
+      data:list.map(([t, v]) => ({value:v, itemStyle:{color:v >= 0 ? PAL.series[0] : PAL.series[1], decal:v >= 0 ? DECALS[0] : DECALS[1],
+        borderRadius:v >= 0 ? [0,4,4,0] : [4,0,0,4]},
+        label:{show:true, position:v >= 0 ? 'right' : 'left', formatter:(v >= 0 ? '↑ ' : '↓ ') + gbp(v,0,true), color:PAL.ink2, fontSize:11.5, fontWeight:700}}))}],
+  };
+}
+function valScatterOpt(rows){
+  const xs = rows.map(r => r.price), ys = rows.map(r => r.value5);
+  const lo = 10 ** Math.floor(Math.log10(Math.min(...xs, ...ys.map(y => y/2)) * .7)), hi = 10 ** Math.ceil(Math.log10(Math.max(...xs.map(x => x*2), ...ys) * 1.4));
+  const ok = r => r.implied >= BAR, pos = side(rows, 'price');
+  return {
+    grid:{left:72, right:120, top:30, bottom:56},
+    tooltip:{trigger:'item', formatter:p => { const r = p.data.r; if(!r) return '';
+      return `<b>${r.t}</b> · ${ok(r) ? '● clears' : '▲ fails'} the bar<br>price ${px(r.price,r.ccy)} · 5y base value ${px(r.value5,r.ccy)}<br>implied 5y CAGR ${pct(r.implied)} (bar ${pct(BAR,2,false)})<br>buy below ${px(r.buy_below,r.ccy)}`; }},
+    xAxis:AX({type:'log', logBase:10, min:lo, max:hi, name:'Price today (listing currency, log scale)', nameLocation:'middle', nameGap:34,
+      axisLabel:{formatter:x => Number(x).toLocaleString('en-GB',{maximumFractionDigits:0})}}),
+    yAxis:AX({type:'log', logBase:10, min:lo, max:hi, name:'Base-case value in 5 years (log)', nameLocation:'middle', nameGap:50,
+      axisLabel:{formatter:x => Number(x).toLocaleString('en-GB',{maximumFractionDigits:0})}}),
+    series:[{type:'scatter', labelLayout:{moveOverlap:'shiftY'}, symbolSize:17,
+      data:rows.map(r => ({value:[r.price, r.value5], r, symbol:ok(r) ? 'circle' : 'triangle',
+        itemStyle:{color:ok(r) ? PAL.series[0] : PAL.series[1], borderColor:'#fff', borderWidth:1.2},
+        label:{show:true, formatter:`${r.t} ${ok(r) ? '●' : '▲'}`, position:pos(r), color:PAL.ink, fontWeight:800, fontSize:12.5}})),
+      emphasis:{scale:1.5},
+      markLine:{silent:true, symbol:'none', data:[
+        [{coord:[lo, 2*lo], lineStyle:{color:PAL.ink, type:'solid', width:2}, label:{formatter:'double bar · 2× / 5y', position:'end', color:PAL.ink, fontWeight:800}}, {coord:[hi/2, hi]}],
+        [{coord:[lo, lo], lineStyle:{color:PAL.ink3, type:'dotted', width:1.5}, label:{show:false}}, {coord:[hi, hi]}]]}}],
+  };
+}
+function raOpt(rows, avg){
+  const pts = rows.filter(r => r.corr_ex != null && r.ra != null), pos = side(pts, 'corr_ex');
+  const ys = pts.map(r => r.ra*100), ymin = Math.floor(Math.min(0, ...ys) / 5) * 5 - 5, ymax = Math.ceil(Math.max(0, ...ys) / 5) * 5 + 5;
+  return {
+    grid:{left:72, right:36, top:30, bottom:56},
+    tooltip:{trigger:'item', formatter:p => { const r = p.data && p.data.r; if(!r) return '';
+      return `<b>${r.t}</b><br>implied ${pct(r.implied)} − hurdle ${pct(r.hurdle)} = <b>${pp(r.ra)}</b><br>β ${num(r.beta)} · ρ with rest of book ${num(r.corr_ex)}`; }},
+    xAxis:AX({type:'value', min:0, max:1, name:'Correlation with the rest of your book (ρ, this stock excluded)', nameLocation:'middle', nameGap:34}),
+    yAxis:AX({type:'value', min:ymin, max:ymax, name:'Implied 5y CAGR − own hurdle', nameLocation:'middle', nameGap:50,
+      axisLabel:{formatter:v => (v > 0 ? '+' : v < 0 ? MINUS : '') + Math.abs(v) + 'pp'}}),
+    series:[{type:'scatter', labelLayout:{moveOverlap:'shiftY'},
+      data:pts.map(r => ({value:[r.corr_ex, r.ra*100], r, symbol:r.ra >= 0 ? 'circle' : 'triangle', symbolSize:12 + Math.sqrt(r.w)*70,
+        itemStyle:{color:r.ra >= 0 ? PAL.series[0] : PAL.series[1], borderColor:'#fff', borderWidth:1.2, opacity:.92},
+        label:{show:true, formatter:`${r.t} ${r.ra >= 0 ? '●' : '▲'}`, position:pos(r), color:PAL.ink, fontWeight:800, fontSize:12.5}})),
+      emphasis:{scale:1.3},
+      markLine:{silent:true, symbol:'none', lineStyle:{color:PAL.ink2, type:'dashed', width:1.5}, data:[
+        {yAxis:0, label:{formatter:'own hurdle', color:PAL.ink2, position:'insideEndTop'}},
+        {xAxis:avg, label:{formatter:`book avg ρ ${num(avg)}`, color:PAL.ink2, position:'insideEndTop'}}]},
+      markArea:{silent:true, itemStyle:{color:hexA(PAL.accent,.07)}, label:{color:PAL.ink, fontWeight:750, position:'insideTopLeft'},
+        data:[[{xAxis:0, yAxis:ymax, name:'beats its hurdle AND diversifies'}, {xAxis:avg, yAxis:0}]]}}],
+  };
+}
+function sparkOpt(vals){
+  return {grid:{left:2, right:2, top:6, bottom:4}, tooltip:{show:false},
+    xAxis:{type:'category', show:false, boundaryGap:false, data:vals.map((_, i) => i)}, yAxis:{type:'value', show:false, scale:true},
+    series:[{type:'line', data:vals, showSymbol:false, lineStyle:{width:2, color:PAL.series[0]}, areaStyle:lineArea(PAL.series[0])}]};
+}
+
+/* ------------------------------ shared blocks ------------------------------ */
+function queueFor(s){ return st.stale ? DATA.stale_preview.queue.concat(s.queue) : s.queue; }
+function nextEvent(t, kind){ return DATA.calendar.events.find(e => e.ticker === t && e.kind === kind && e.date >= TODAY) || null; }
+function sunburstBlock(nodes, center){
+  const lg = nodes.map((n, i) => `<li data-name="${esc(n.name)}"><span class="sw" style="--c:var(--s${i+1})"></span>
+    <span class="nm">${esc(n.name)}<small>${esc(n.members ? n.members.join(' · ') : n.children.slice(0,4).map(k => k.name).join(', ') + (n.children.length > 4 ? ` +${n.children.length-4}` : ''))}</small></span><b>${pct(n.value,1,false)}</b></li>`).join('');
+  return `<div class="sun">${slot(el => { const c = Chart.mount(el, sunOpt(nodes, center)); if(!c) return;
+      el.parentElement.querySelectorAll('.sunlg li').forEach(li => {
+        li.addEventListener('pointerenter', () => c.dispatchAction({type:'highlight', name:li.dataset.name}));
+        li.addEventListener('pointerleave', () => c.dispatchAction({type:'downplay', name:li.dataset.name})); }); }, 'h-420')}
+    <ul class="sunlg">${lg}</ul></div>`;
+}
+
+/* ------------------------------ FRONT ------------------------------ */
+function tiles(s){
+  const t = s.tiles, eq = t.equity / t.value, ca = t.cash / t.value;
+  return `<div class="tiles">
+  <div class="tile rise"><div class="l">Portfolio value ${help(ind('Holdings at T212\'s own £ value, plus uninvested cash, from the ' + DATA.meta.source + '. Reconciled line by line (execution/dashboard/reconcile_statement.py).', 'T212\'s own total (holdings at its live £ value, plus cash) from the ' + DATA.meta.source + '. The ledger replays to it every night (t212_ledger.py). Returns are measured on the daily closes, so they end on the close value, ' + gbp(closeValue(s)) + ', not on this live figure.'))}${tag('✓ ties to T212','cons')}</div>
+    <div class="n"><span data-count="${t.value}" data-fmt="gbp">${gbp(t.value)}</span></div>
+    <div class="ce-bar" role="img" aria-label="Equity ${pct(eq,1,false)}, cash ${pct(ca,1,false)}"><span class="eq" style="flex:${eq} 1 0"></span><span class="ca" style="flex:${ca} 1 0"></span></div>
+    <div class="ce-lab"><span>■ Equity <b>${pct(eq,1,false)}</b> · ${gbp(t.equity)}</span><span>▨ Cash <b>${pct(ca,1,false)}</b> · ${gbp(t.cash)}</span></div><span class="shimmer"></span></div>
+  <div class="tile rise"><div class="l">YTD return · TWR ${help('Time-weighted return since 31 Dec: it strips out when you added money, so it measures the picks themselves. Under a year, so cumulative, never annualised.')}${t.ytd_source === 'back-cast' ? '' : tag(SRC,'cons')}</div>
+    ${t.ytd_source === 'back-cast' ? AWAIT('YTD TWRR from the T212 app (or an all-time statement)')
+      : `<div class="n">${arrow(t.ytd_twr)}<span data-count="${t.ytd_twr}" data-fmt="pct">${pct(t.ytd_twr)}</span></div>
+    <div class="d">time-weighted · since ${t.ytd_start ? dLong(t.ytd_start) : '–'} · ${esc(t.ytd_source)}</div>`}<span class="shimmer"></span></div>
+  <div class="tile rise"><div class="l">Last 12 months · £ gain ${help('Value change over the last 12 months MINUS the net deposits you made in that time — what the market made you, excluding your own contributions. TWRR strips out deposit timing; ' + ind('MWR (from the Phase-4 ledger) will include it.', 'the MWR beneath includes it, and is the basis T212\'s app shows.'))}${t.y1_source === 'back-cast' ? tag('◇ estimate') : tag(SRC,'cons')}</div>
+    ${t.y1_source === 'back-cast' ? AWAIT('12-month return from the T212 app')
+      : `<div class="n">${arrow(t.y1_gain)}<span data-count="${t.y1_gain}" data-fmt="gbps2">${gbp(t.y1_gain,2,true)}</span></div>
+    <div class="d">TWRR <b>${pct(t.y1_twr)}</b> · nominal, deposits excluded · ${esc(t.y1_source)}</div>`}<span class="shimmer"></span></div>
+  <div class="tile rise"><div class="l">Lifetime gain ${help('Balance today minus net deposits (everything paid in, less withdrawals) over the account\'s life. The % is the time-weighted return ANNUALISED over the account\'s life; ' + ind('T212 shows it cumulative.', 'T212\'s app shows a money-weighted figure instead (beneath).') + ' Follows the ISA / Invest / All toggle.')}${t.lifetime_cum == null ? '' : tag(SRC,'cons')}</div>
+    ${t.lifetime_cum == null ? AWAIT('all-time return from the T212 app (or an all-time activity statement)')
+      : `<div class="n">${arrow(t.lifetime_gain)}<span data-count="${t.lifetime_gain}" data-fmt="gbps2">${gbp(t.lifetime_gain,2,true)}</span></div>
+    <div class="d">TWRR <b>${pct(t.lifetime_pct)} a year</b> · ${pct(t.lifetime_cum)} total over ${t.lifetime_years.toFixed(1)} years${t.lifetime_deposits != null ? ` · net deposits ${gbp(t.lifetime_deposits)}` : ''} · ${esc(t.lifetime_source)}</div>`}<span class="shimmer"></span></div>
+  </div>`;
+}
+function calendar(s){
+  const held = new Set(s.tickers), ev = DATA.calendar.events.filter(e => held.has(e.ticker));
+  const t0 = pd(TODAY), months = [0, 1].map(k => new Date(Date.UTC(t0.getUTCFullYear(), t0.getUTCMonth() + st.cal + k, 1)));
+  const grid = m => { const y = m.getUTCFullYear(), mo = m.getUTCMonth(), first = (m.getUTCDay() + 6) % 7, nd = new Date(Date.UTC(y, mo+1, 0)).getUTCDate();
+    const by = {}; ev.forEach(e => { const d = pd(e.date); if(d.getUTCFullYear() === y && d.getUTCMonth() === mo) (by[d.getUTCDate()] = by[d.getUTCDate()] || []).push(e); });
+    let cells = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => `<div class="dow">${d}</div>`).join('');
+    for(let i = 0; i < first; i++) cells += '<div class="cd blank"></div>';
+    for(let d = 1; d <= nd; d++){ const ds = iso(new Date(Date.UTC(y, mo, d))), wd = (first + d - 1) % 7, list = by[d] || [];
+      const chip = e => e.kind === 'earnings' ? `<span class="ev ev-e" title="${esc(e.ticker)} earnings · ${esc(e.session)} · ${esc(e.time)} ${esc(e.tz)}">E ${esc(e.ticker)}<small>${esc(e.time)}</small></span>`
+        : e.kind === 'exdiv' ? `<span class="ev ev-x" title="${esc(e.ticker)} ex-dividend${IND ? ' (indicative date)' : ''}">XD ${esc(e.ticker)}</span>`
+        : `<span class="ev ev-p" title="${esc(e.ticker)} dividend paid${IND ? ' (indicative date)' : ''}">£ ${esc(e.ticker)}</span>`;
+      const more = list.length > 3 ? `<span class="ev-more" title="${esc(list.slice(3).map(e => e.ticker + ' ' + e.kind).join(', '))}">+${list.length-3} more</span>` : '';
+      cells += `<div class="cd${ds < TODAY ? ' past' : ''}${ds === TODAY ? ' today' : ''}${wd > 4 ? ' we' : ''}"><span class="dnum">${d}</span>${list.slice(0,3).map(chip).join('')}${more}</div>`; }
+    const tail = (7 - (first + nd) % 7) % 7; for(let i = 0; i < tail; i++) cells += '<div class="cd blank"></div>';
+    return `<div><h4 class="mh">${MONL[mo]} ${y}</h4><div class="cg">${cells}</div></div>`; };
+  return `<div class="cal-top"><span class="cal-nav"><button data-cal="-1" ${st.cal <= 0 ? 'disabled' : ''} aria-label="Previous month">‹</button>
+    <button data-cal="1" ${st.cal >= 4 ? 'disabled' : ''} aria-label="Next month">›</button></span>
+    <span class="cal-lg"><span class="ev ev-e">E earnings</span><span class="ev ev-x">XD ex-dividend</span><span class="ev ev-p">£ dividend paid</span>${tag(ind('◇ dividend dates indicative', '◇ dividend dates from Yahoo · London lines carry no pay date'))}</span></div>
+    <div class="cal-months">${months.map(grid).join('')}</div>`;
+}
+function qcard(i){
+  const f = i.signals[0], more = i.signals.length - 1, kind = {holding:'holding', portfolio:'portfolio · consolidated', coverage:'coverage', data:'data health', system:'build integrity'}[i.kind] || i.kind;
+  return `<article class="qc qc-${TIER[i.tier][2]}">
+    <header><b class="lab">${esc(i.label)}</b><span class="kind">${esc(kind)}</span><span class="since">since ${esc(f.since)}</span></header>
+    <p class="what">${esc(f.what)}</p>
+    ${i.chips ? `<div class="chips">${i.chips.map(c => `<span class="chip">${esc(c)}</span>`).join('')}</div>` : ''}
+    <details><summary>First action · if ignored${more ? ` · +${more} more signal${more > 1 ? 's' : ''}` : ''}</summary>
+    ${i.signals.map((g, k) => `<div class="sig">${k ? `<p>${tb(g.tier, true)} ${esc(g.what)}</p>` : ''}<p><b>First action:</b> ${esc(g.action)}</p><p><b>If ignored:</b> ${esc(g.ignored)}</p></div>`).join('')}
+    </details></article>`;
+}
+function needsYou(s){
+  const q = queueFor(s), c = {act:0, review:0, fyi:0}; q.forEach(i => c[i.tier]++); const n = c.act + c.review;
+  const empty = {act:'Nothing to act on. ■ fires only for a fired thesis trigger, a T212-API vs ledger break, or a build older than 36 h — try “Stale preview” in the header.',
+    review:'Nothing to review this week.', fyi:'No FYI items.'};
+  const col = t => `<div class="kcol k-${TIER[t][2]} rise"><header>${tb(t)}<span class="cnt">${c[t]}</span></header>
+    ${q.filter(i => i.tier === t).map(qcard).join('') || `<div class="kempty">${empty[t]}</div>`}</div>`;
+  return `<section class="needs"><h2 class="sh rise">Needs you</h2>
+    <div class="card strip rise"><div class="sx"><span class="k">Actionable</span><b data-count="${n}" data-fmt="int">${n}</b>
+      <span class="k">target &lt; 5 · ${n < 5 ? '● within target' : '▲ over target'}</span></div>
+      <div class="sx">${tb('act')}<b>${c.act}</b></div><div class="sx">${tb('review')}<b>${c.review}</b></div><div class="sx">${tb('fyi')}<b>${c.fyi}</b></div>
+      <div class="sx note">One card per holding · re-alerts only when a reading changes · bands judged on the consolidated book</div></div>
+    <div class="kanban">${col('act')}${col('review')}${col('fyi')}</div></section>`;
+}
+function front(s){
+  return tiles(s) + `<div class="g-front2">
+    ${card('Sector → holdings', sunburstBlock(s.sunburst.sector, gbpk(s.tiles.equity) + '\nequity'), {tags:tag('◇ sector map provisional · open item 4'), aside:'holdings ≥ 5% named on the ring'})}
+    ${card('Value · last 12 months', slot(el => Chart.mount(el, valueLineOpt(s.value_1y)), 'h-420'), {tags:tag(ind('◇ back-cast path', '✓ ledger')), aside:ind('ends on the T212 value (' + DATA.meta.source + ') · shape is an estimate until the ledger', 'daily close value from the ledger · the value tile is T212\'s live read')})}</div>
+    ${card('Calendar', `<div id="cal">${calendar(s)}</div>`, {aside:'earnings_calendar.csv + dividend calendar · follows the account toggle'})}
+    ${needsYou(s)}`;
+}
+
+/* ------------------------------ ALLOCATION & RISK ------------------------------ */
+function alloc(s){
+  const g = s.gauges, B = DATA.consolidated.bands, fg = DATA.market.fear_greed;
+  const bandState = b => b.breach ? '<span class="st st-watch">▲ over band</span>' : b.near ? '<span class="st st-neutral">◇ near band</span>' : '<span class="st st-good">● within band</span>';
+  const gc = (title, state, opt, sub, extra='') => `<section class="card gauge rise"><header class="ch"><h3>${title}</h3>${state}</header>
+    ${slot(el => Chart.mount(el, opt), 'h-200')}<div class="gsub">${sub}</div>${extra}</section>`;
+  const scale = {single:.2, sector:.5, currency:1}, title = {single:'Largest holding', sector:'Largest sector', currency:'Largest non-GBP currency'};
+  const bands = B.map(b => gc(title[b.key], bandState(b),
+    gaugeOpt({value:b.value, max:scale[b.key], marker:b.limit, fmt:x => pct(x, b.key === 'single' ? 1 : 0, false)}),
+    `<b>${esc(b.who)}</b> · band ${pct(b.limit,0,false)} (white tick) · ${tag('consolidated','cons')}`)).join('');
+  const fgx = (k, v) => `<span>${k} <b>${v}</b></span>`;
+  return `<div class="g4">${bands}
+    ${gc('Beta vs VWRP', '', gaugeOpt({value:g.beta, max:2, marker:1, fmt:x => num(x)}), `market = 1.00 (tick) · ρ ${num(g.corr)} · weekly GBP, 2y`)}
+    ${gc('Volatility · annualised', '', gaugeOpt({value:g.vol, max:.5, marker:g.vwrp_vol, fmt:x => pct(x,1,false)}), `VWRP <b>${pct(g.vwrp_vol,1,false)}</b> (tick) · weekly GBP, 2y`)}
+    ${gc('Top-5 weight', '', gaugeOpt({value:g.top5, max:1, fmt:x => pct(x,0,false)}), esc(g.top5_names.join(' · ')))}
+    ${gc('Holdings', '', gaugeOpt({value:g.eff_n, max:g.n, fmt:() => String(g.n)}), `spread like <b>~${Math.round(g.eff_n)} equal-sized positions</b> (arc)`)}
+    ${fg.now == null ? `<section class="card gauge rise"><header class="ch"><h3>CNN Fear &amp; Greed</h3>${tag('◇ no reading')}</header><div class="ec h-200 ec-off">◇ no reading tonight</div><div class="gsub">${esc(fg.source)}</div></section>`
+      : gc('CNN Fear &amp; Greed', tag(ind('◇ indicative', '◇ unofficial CNN feed')), fgOpt(fg.now), `US market mood, 0–100 · as of ${dShort(fg.as_of)}`,
+      `<div class="fgh">${fgx('Yesterday', fg.prev)}${fgx('1 week', fg.w1)}${fgx('1 month', fg.m1)}${mv(fg.now - fg.m1, (fg.now - fg.m1 > 0 ? '+' : MINUS) + Math.abs(fg.now - fg.m1) + ' vs 1m')}</div>`)}
+  </div>
+  <div class="g2">${card('Sector → holdings', sunburstBlock(s.sunburst.sector, gbpk(s.tiles.equity) + '\nequity'), {tags:tag('◇ provisional · open item 4')})}
+    ${card('Currency → holdings', sunburstBlock(s.sunburst.currency, gbpk(s.tiles.equity) + '\nequity'), {aside:'listing currency' + s.sunburst.currency.filter(c => /risk/.test(c.name)).map(c => ` · ${c.children.map(k => k.name).join(', ')} carr${c.children.length > 1 ? 'y' : 'ies'} ${c.name.replace(/^.*\((\w+) risk\)$/, '$1')} risk`).join('')})}</div>
+  <div class="g3">${card('Account split', slot(el => Chart.mount(el, donutOpt(s.part.account, gbpk(s.tiles.value)), {decal:true}), 'h-320'))}
+    ${card('Stocks · ETFs · cash', slot(el => Chart.mount(el, donutOpt(s.part.asset, gbpk(s.tiles.value)), {decal:true}), 'h-320'))}
+    ${card('Region of business', slot(el => Chart.mount(el, donutOpt(s.part.region, gbpk(s.tiles.equity)), {decal:true}), 'h-320'), {tags:tag(ind('◇ placeholder map · open item 5', '◇ draft map · open item 5'))})}</div>
+  <div class="g-risk">${card('Risk share vs weight', slot(el => Chart.mount(el, riskScatterOpt(s)), 'h-460'), {aside:'above the diagonal = more risk than weight'})}
+    ${card('Risk contribution', `<div id="rtab">${riskTable(s)}</div>`, {aside:`${esc(s.risk.window)} · weekly GBP returns · ${s.risk.covered} covered`})}</div>`;
+}
+const cmp = (a, b) => (a == null) - (b == null) || (typeof a === 'string' ? a.localeCompare(b) : a - b);
+function sortRows(rows, [k, dir]){ return [...rows].sort((a, b) => a[k] == null || b[k] == null ? cmp(a[k], b[k]) : cmp(a[k], b[k]) * dir); }
+const th = (key, label, cur, cls='') => `<th class="${cls}" data-sort="${key}">${label}${cur[0] === key ? ` <span class="sa">${cur[1] < 0 ? '▼' : '▲'}</span>` : ''}</th>`;
+function riskTable(s){
+  const rows = sortRows(s.risk.rows.map(r => Object.assign({ratio:r.rc != null ? r.rc / r.w : null}, r)), st.rsort), c = st.rsort;
+  return `<table class="tbl" data-tbl="risk"><thead><tr>${th('t','Holding',c)}${th('w','Weight',c,'n')}${th('rc','Risk share',c,'n')}${th('ratio','Risk ÷ weight',c,'n')}
+    ${th('beta','<span class="gk">β</span> vs VWRP',c,'n')}${th('corr','<span class="gk">ρ</span> vs VWRP',c,'n')}${th('corr_ex','<span class="gk">ρ</span> vs rest of book',c,'n')}${th('vol','Vol (ann.)',c,'n')}</tr></thead><tbody>
+    ${rows.map(r => `<tr><td><b>${esc(r.t)}</b> <small style="display:inline">${esc(r.cur)}</small></td><td class="n">${pct(r.w,1,false)}</td><td class="n">${r.rc == null ? '–' : pct(r.rc,1,false)}</td>
+      <td class="n">${r.ratio == null ? '–' : num(r.ratio) + '×'}</td><td class="n">${num(r.beta)}</td><td class="n">${num(r.corr)}</td><td class="n">${num(r.corr_ex)}</td><td class="n">${r.vol == null ? '–' : pct(r.vol,0,false)}</td></tr>`).join('')}
+    </tbody></table>${s.risk.excluded.length ? `<p class="muted" style="font-size:12px;margin:8px 0 0">${ind('Not in the risk maths (no cached history, indicative prices)', 'Proxied on VWRP (under 52 weeks of price history)')}: ${esc(s.risk.excluded.join(', '))}.</p>` : ''}`;
+}
+
+/* ------------------------------ PERFORMANCE ------------------------------ */
+let perfCharts = {};
+function perfSummary(s){
+  const R = s.perf.ranges[rangeKey(s)], a = R.actual[R.actual.length-1], b = R.vwrp[R.vwrp.length-1];
+  const note = st.range === '5Y' ? `<span class="tag">◇ 5Y needs 5 years of history — showing Max</span>` : '';
+  return `<div class="psum"><span>You<b>${gbp(a)}</b></span><span>VWRP, same deposits<b>${gbp(b)}</b></span><span>Stock-picking vs VWRP<b>${mv(a-b, gbp(a-b,0,true))}</b></span>
+    <span>Paid in over the range<b>${gbp(R.deposits)}</b></span></div>${tag(ind('◇ illustrative — back-cast path and assumed deposits', '✓ ledger · your real deposits on their real days'))}${note}`;
+}
+function windowsTable(s){
+  const ann = (w, v) => w.ann && v != null ? `<small>${pct(v)} ann.</small>` : '';
+  // George prefers annualised: over a year the annualised rate leads and the
+  // cumulative figure drops to small print (1Y is the same number either way).
+  const rate = (w, v, va) => w.ann && va != null && w.years > 1.01 ? `${pct(va)}<small>a year · ${pct(v)} total</small>` : `${pct(v)}${ann(w, va)}`;
+  const badge = w => w.source === 'back-cast' ? '◇ back-cast estimate' : String(w.source).startsWith('computed') ? '✓ ' + esc(w.source) : '✓ T212';
+  return `<table class="tbl"><thead><tr><th>Window</th><th class="n">TWR</th><th class="n">MWR</th><th class="n">£ gain (ex deposits)</th><th class="n">VWRP-matched £</th><th class="n">Gap vs VWRP</th></tr></thead><tbody>
+  ${s.perf.windows.map(w => w.na ? `<tr><td><b>${w.k}</b></td><td colspan="5" class="muted">n/a — only ${esc(w.na.replace('history ', ''))} of history; never extrapolated</td></tr>`
+    : w.source === 'back-cast' ? `<tr><td><b>${w.k}</b></td><td colspan="5" class="muted">◇ awaiting T212 — the back-cast estimate was wrong, so it is hidden until the T212 figure or the Phase-4 ledger arrives</td></tr>`
+    : `<tr><td><b>${w.k}</b>${w.k === 'Max' ? `<small>${w.years.toFixed(1)} years</small>` : ''}<small>${badge(w)}</small></td><td class="n">${rate(w, w.twr, w.twr_ann)}</td><td class="n">${rate(w, w.mwr, w.mwr_ann)}</td>
+      <td class="n">${mv(w.pnl, gbp(w.pnl,0,true))}</td><td class="n">${w.vwrp_pnl == null ? '<span class="muted">needs ledger</span>' : gbp(w.vwrp_pnl,0,true)}<small>${pct(w.vwrp_match_pct)}${w.ann && w.match_ann != null ? ` · ${pct(w.match_ann)} ann.` : ''}</small></td>
+      <td class="n">${mv(w.excess_gbp, gbp(w.excess_gbp,0,true))}</td></tr>`).join('')}</tbody></table>
+  <p class="muted" style="font-size:12px;margin:8px 0 0">${ind("✓ T212 rows are your broker's figures. ✓ computed rows start after your last trade, so they price the units you actually held. Rows marked awaiting fill in as T212 figures or the Phase-4 ledger arrive.", "✓ computed rows replay the T212 ledger on the daily closes. TWR strips out when you added money; MWR includes it, and is the basis T212's app shows.")} Under 1 year: cumulative only, never annualised; over 1 year: annualised, with the total in small print. £ gain = value change − net deposits. VWRP-matched = the same deposits bought VWRP on the same days.</p>`;
+}
+// Income bars: dividends plus cash interest / bond income (George, 2026-10-03).
+// Non-dividend rows get their own colour AND hatch AND a text label, so the
+// split never rests on colour alone; they sit below the dividend payers.
+const INC = {div:{c:PAL.series[5], d:DECALS[0], label:'dividend'},
+             cash:{c:PAL.series[4], d:DECALS[1], label:'cash interest'},
+             bond:{c:PAL.series[3], d:DECALS[2], label:'bond income'}};
+function incomeRows(s){
+  return [...s.perf.dividends.map(x => ({...x, kind:'div', name:x.t})),
+          ...(s.perf.income_other || []).map(x => ({...x, name:x.label}))];
+}
+function divOpt(list){
+  return {
+    grid:{left:list.some(x => x.kind !== 'div') ? 104 : 64, right:80, top:6, bottom:24},
+    tooltip:{trigger:'item', formatter:p => { const x = list[p.dataIndex];
+      return `<b>${esc(x.name)}</b>: ${gbp(x.t12m,0)} a year` + (x.kind === 'div' ? ''
+        : `<br>T212 received ${gbp(x.received,2)} over ${x.days} days (from ${dShort(x.start)}), ${ind('annualised', 'the trailing 12 months')}`); }},
+    xAxis:AX({type:'value', axisLabel:{formatter:x => gbpk(x), showMaxLabel:false}}),
+    yAxis:AX({type:'category', inverse:true, data:list.map(x => x.name), axisLabel:{color:PAL.ink, fontWeight:700}, axisLine:{show:false}}),
+    series:[{type:'bar', barWidth:'60%', animationDelay:i => i*40,
+      data:list.map(x => ({value:x.t12m, itemStyle:{color:INC[x.kind].c, decal:INC[x.kind].d, borderRadius:[0,4,4,0]},
+        label:{show:true, position:'right', formatter:gbp(x.t12m), color:PAL.ink2, fontSize:11.5, fontWeight:700}}))}],
+  };
+}
+// ETFs held that paid nothing in 12 months: the accumulating ones (from the data, never typed in)
+const accEtfs = s => [...new Set(s.holdings.filter(h => h.etf && !s.perf.dividends.some(d => d.t === h.ticker)).map(h => h.ticker))];
+function dividends(s){
+  // tot = dividends only: it drives the summary and the yield, and must not see
+  // interest. totInc = all income: it drives only the "% of income" notes.
+  const L = s.perf.dividends, O = s.perf.income_other || [], all = incomeRows(s);
+  const tot = L.reduce((a, x) => a + x.t12m, 0), totInc = all.reduce((a, x) => a + x.t12m, 0);
+  if(!all.length) return card('Dividend income by holding', '<p class="muted">No dividend payers in this account — the ETFs held here are accumulating, so dividends are reinvested inside the fund.</p>');
+  const share = x => `<small>${pct(x.t12m / totInc,0,false)} of income</small>`;
+  const rows = L.map(x => { const e = nextEvent(x.t, 'exdiv'), p = nextEvent(x.t, 'pay');
+    return `<tr><td><b>${esc(x.t)}</b></td><td class="n"><b>${gbp(x.t12m)}</b>${share(x)}</td><td class="n">${pct(x.yield,1,false)}</td>
+      <td>${e ? dNice(e.date) : '<span class="muted">–</span>'}</td><td>${p ? dNice(p.date) : '<span class="muted">–</span>'}</td></tr>`; }).join('')
+    + O.map(x => `<tr><td><b>${esc(x.label)}</b> ${tag((x.kind === 'cash' ? '▨ ' : '⁘ ') + INC[x.kind].label)}<small>${esc(x.accounts.join(' + '))} · T212, ${ind('annualised', 'trailing 12 months')}</small></td>
+      <td class="n"><b>${gbp(x.t12m)}</b>${share(x)}</td><td class="n"><span class="muted" title="Kept out of the dividend yield">–</span></td>
+      <td><span class="muted">–</span></td><td>${x.kind === 'cash' ? 'daily' : '<span class="muted">–</span>'}</td></tr>`).join('');
+  const sum = `<div class="psum" style="margin-bottom:14px"><span>Last 12 months<b>${gbp(tot)}</b></span><span>Per month, average<b>${gbp(tot/12)}</b></span>
+    <span>Yield on invested value<b>${pct(tot / s.tiles.equity,2,false)}</b></span><span>Payers<b>${L.length}</b></span></div>`;
+  const key = O.length ? `<p class="muted" style="font-size:12px;margin:6px 0 0">■ dividend${O.map(x => ` · ${x.kind === 'cash' ? '▨' : '⁘'} ${INC[x.kind].label}`).join('')} — ${O.map(x => INC[x.kind].label).join(' and ')} counted in "% of income" only, never in the totals or yield above</p>` : '';
+  return card('Dividend income by holding', `${sum}<div class="g2" style="margin:0;align-items:start"><div>${slot(el => Chart.mount(el, divOpt(all)), '', `height:${all.length*30 + 40}px`)}${key}</div>
+    <table class="tbl"><thead><tr><th>Holding</th><th class="n">12m income</th><th class="n">Yield</th><th>Next ex-div</th><th>Next paid</th></tr></thead><tbody>${rows}</tbody></table></div>`,
+    {tags:tag(ind('◇ indicative — needs the Phase-4 ledger', '✓ ledger · trailing 12 months')), aside:'cash dividends paid out' + (accEtfs(s).length ? ` · Acc ETFs (${accEtfs(s).join(', ')}) reinvest internally and pay nothing` : '') + (O.length ? ind(' · interest is T212\'s own, annualised', ' · interest is T212\'s own') : '')});
+}
+function perf(s){
+  const sp = s.perf.since, n = sp.contribution.length;
+  return `<div class="perf-top rise"><div class="seg" role="group" aria-label="Range">${['YTD','1Y','5Y','Max'].map(k => `<button data-range="${k}" aria-pressed="${st.range === k}">${k}</button>`).join('')}</div>
+      <div id="psum">${perfSummary(s)}</div></div>
+    ${card('Your £ value vs VWRP bought with the same deposits', slot(el => { perfCharts.line = Chart.mount(el, perfOpt(s)); }, 'h-440'), {tags:tag(ind('◇ back-cast path — not your real history', '✓ ledger')), aside:ind('ends on the T212 value (' + DATA.meta.source + ')', 'daily close values from the ledger') + ' · the gap between the lines is the £ cost or benefit of stock-picking'})}
+    <div class="g-perf"><div class="col">${card('Returns by window', windowsTable(s), {aside:'TWR = the picks · MWR = your experience incl. top-up timing'})}
+      ${card('Capital · FX · dividends since purchase', slot(el => Chart.mount(el, wfOpt(sp)), 'h-300'), {aside:'capital + FX = T212 open result · split at your average buy FX · unrealised'})}</div>
+      ${card('£ gain by holding since purchase', slot(el => Chart.mount(el, ctOpt(sp.contribution)), '', `height:${n*24 + 40}px`), {aside:'winners → losers · T212 open result per holding, ' + DATA.meta.source})}</div>
+    ${dividends(s)}`;
+}
+function setRange(k){
+  st.range = k; const s = S();
+  document.querySelectorAll('[data-range]').forEach(b => b.setAttribute('aria-pressed', b.dataset.range === k));
+  document.getElementById('psum').innerHTML = perfSummary(s);
+  Chart.update(perfCharts.line, perfOpt(s));
+}
+
+/* ------------------------------ VALUATION BOARD ------------------------------ */
+function val(s){
+  const rows = s.valuation, gilt = DATA.market.gilt_10y;
+  if(!rows.length) return card('Valuation board', '<p class="muted">No valuation snapshots for holdings in this account. ETFs are exempt.</p>');
+  const fresh = r => r.fresh.stale ? (r.has_triggers ? `<span class="tb t-rev"><i>▲</i> STALE</span>` : `<span class="tb t-fyi"><i>◇</i> STALE</span>`) + `<small>${esc(r.fresh.why)}</small>`
+    : `<span class="up" style="color:var(--ink)">● fresh</span><small>${esc(r.fresh.why)}</small>`;
+  const mult = r => r.multiples.length ? r.multiples.map(m => `<div class="mult">${esc(m.k)} <b>${num(m.now,1)}</b>${m.med == null ? ' · ◇ no 5y median' : ` · 5y med ${num(m.med,1)} ${m.now < m.med ? '↓ below' : '↑ above'}`}</div>`).join('') : '<span class="muted">–</span>';
+  const plot = rows.filter(r => r.value5 != null), none = msg => `<div class="ec h-460 ec-off">${msg}</div>`;
+  const thesis = r => r.thesis.pinned ? `${r.thesis.conviction != null ? `<b>${r.thesis.conviction}/10</b> · ` : ''}${r.thesis.pinned} pinned${r.thesis.pending.map(p => `<br>${tb('review',true)} ${esc(p)} pending`).join('')}` : '<span class="muted">no pinned triggers</span>';
+  const ok = r => r.implied >= BAR;
+  return `<div class="g2">${card('Price vs 5-year base-case value', plot.length ? slot(el => Chart.mount(el, valScatterOpt(plot)), 'h-460') : none('◇ No 5-year base values on file yet — re-run /valuation (step 8 persists them)'), {tags:tag(ind('◇ indicative snapshots', `◇ ${plot.length} of ${rows.length} with a 5y base value`)), aside:'solid line = the double bar (2× in 5 years, 14.87%/yr) · dotted = flat · above the solid line clears'})}
+    ${card('Risk-adjusted: headroom over own hurdle vs diversification', plot.length ? slot(el => Chart.mount(el, raOpt(rows, s.risk.corr_ex_avg)), 'h-460') : none('◇ Needs the 5-year base values — re-run /valuation'),
+      {tags:tag(ind('◇ gilt indicative', gilt.value == null ? '◇ no gilt reading' : `✓ gilt ${dShort(gilt.as_of)}`)), aside:`hurdle = gilt ${pct(gilt.value,2,false)} + β × (14.87% − gilt) · bubble = weight`})}</div>
+  ${card('Valuation board', `<table class="tbl"><thead><tr><th>Holding</th><th class="n">Price</th><th class="n">5y base value</th><th class="n">Implied 5y CAGR</th><th class="n">vs 14.87% bar</th>
+    <th class="n">Buy below</th><th class="n"><span class="gk">β</span></th><th class="n">Own hurdle</th><th class="n">Risk-adj.</th><th>Valued</th><th>Freshness</th><th>Multiples vs own 5y median</th><th>Thesis</th></tr></thead><tbody>
+    ${rows.map(r => `<tr><td><b>${esc(r.t)}</b><small>${pct(r.w,1,false)} of book</small></td><td class="n">${px(r.price, r.ccy)}</td><td class="n">${px(r.value5, r.ccy)}</td>
+      <td class="n">${r.implied == null ? '<span class="muted">◇ re-run /valuation</span>' : `<b>${pct(r.implied)}</b><small>${ok(r) ? '● clears' : '▲ fails'}</small>`}</td><td class="n">${mv(r.headroom, pp(r.headroom))}</td><td class="n">${px(r.buy_below, r.ccy)}</td>
+      <td class="n">${num(r.beta)}</td><td class="n">${pct(r.hurdle,1,false)}</td><td class="n">${mv(r.ra, pp(r.ra))}</td>
+      <td>${dShort(r.val_date)}<small>last print ${r.last_print ? dShort(r.last_print) : '–'}</small></td><td>${fresh(r)}</td><td>${mult(r)}</td><td>${thesis(r)}</td></tr>`).join('')}
+    </tbody></table>`, {aside:ind('sorted by headroom to the bar · ETFs exempt · multiples ◇ indicative', 'sorted by headroom to the bar, then weight · ETFs exempt · multiples from /ratios')})}`;
+}
+
+/* ------------------------------ HOLDINGS ------------------------------ */
+function flags(r){
+  const f = [];
+  if(r.px_stale) f.push(`<span class="flag" title="price carried forward or indicative">◇ px ${r.px_date ? dShort(r.px_date) : 'indic.'}</span>`);
+  if(r.stmt_flag) f.push(`<span class="flag" title="${esc(r.stmt_flag)}">◇ statement</span>`);
+  if(!r.etf && !r.has_triggers) f.push('<span class="flag" title="no pinned thesis triggers">◇ no triggers</span>');
+  return f.join('');
+}
+function detail(r, q, idx){
+  const e = nextEvent(r.ticker, 'earnings'), x = nextEvent(r.ticker, 'exdiv'), p = nextEvent(r.ticker, 'pay');
+  const trig = r.has_triggers && DATA.triggers[r.ticker] ? DATA.triggers[r.ticker].map(t => `<div>${t.state === 'clear' ? '● clear' : /^fired/i.test(t.state) ? tb('act',true) + ' ' + esc(t.state) : /^pending/.test(t.state) ? tb('review',true) + ' ' + esc(t.state) : '◇ ' + esc(t.state)} · <b>${esc(t.id)}</b> ${esc(t.label)}</div>`).join('') : '<span class="muted">No pinned triggers.</span>';
+  const dual = Math.abs(r.ticker_weight - r.weight) > 1e-6;
+  return `<div class="hdg"><div><h4>60-day price · GBP</h4><div class="ec h-90" data-spark="${idx}"></div><small class="muted">${px(r.price_local, r.listing_ccy)} · ${r.px_date ? 'close ' + dShort(r.px_date) : 'indicative price'}</small></div>
+    <div><h4>Position</h4><div class="kv"><span>Units</span><b>${Number(r.units).toLocaleString('en-GB',{maximumFractionDigits:4})}</b><span>Avg cost</span><b>${px(r.avg_local, r.listing_ccy)}</b>
+      <span>Cost</span><b>${gbp(r.cost_gbp)}</b><span>Value</span><b>${gbp(r.value)}</b><span>Account</span><b>${esc(r.account)}</b>
+      ${dual ? `<span>Ticker total</span><b>${pct(r.ticker_weight,1,false)} of book</b>` : ''}</div></div>
+    <div><h4>Dates</h4><div class="kv"><span>Earnings</span><b>${e ? dNice(e.date) + ' · ' + esc(e.session) + ' ' + esc(e.time) : 'no forward date'}</b>
+      <span>Ex-div</span><b>${x ? dNice(x.date) + ' ◇' : '–'}</b><span>Paid</span><b>${p ? dNice(p.date) + ' ◇' : '–'}</b>
+      <span>Sector</span><b>${esc(r.sector)}</b><span>Region</span><b>${esc(r.region)} ◇</b></div></div>
+    <div><h4>Valuation · triggers</h4>${r.implied_cagr != null ? `<div>Implied 5y CAGR <b>${pct(r.implied_cagr)}</b> ${r.implied_cagr >= BAR ? '● clears' : '▲ fails'} the bar · valued ${dShort(r.val_date)}</div>` : `<div class="muted">${r.val_date ? `Valued ${dShort(r.val_date)} · ◇ no 5-year base value — re-run /valuation` : 'No valuation snapshot.'}</div>`}<div style="margin-top:6px;font-size:13px">${trig}</div></div>
+    <div><h4>Queue</h4>${q ? q.signals.map(g => `<div style="margin-bottom:6px">${tb(g.tier,true)} ${esc(g.what)}<br><small class="muted">First action: ${esc(g.action)}</small></div>`).join('') : '<span class="muted">No queue items.</span>'}</div></div>`;
+}
+function holdTable(s){
+  const qmap = {}; queueFor(s).forEach(i => { if(i.kind === 'holding') qmap[i.key] = i; });
+  const c = st.hsort, rows = sortRows(s.holdings.map((r, i) => Object.assign({_i:i}, r)), c);
+  return `<table class="tbl" data-tbl="hold"><thead><tr>${th('ticker','Holding',c)}<th>Queue</th>${th('price_local','Price',c,'n')}${th('units','Units',c,'n')}${th('value','Value',c,'n')}
+    ${th('weight','Weight',c,'n')}${th('day_pct','Day',c,'n')}${th('pnl','P&amp;L since buy',c,'n')}<th>Next earnings</th><th>Flags</th></tr></thead><tbody>
+    ${rows.map(r => { const q = qmap[r.ticker], e = nextEvent(r.ticker, 'earnings');
+      return `<tr class="hr" data-i="${r._i}"><td><b>${esc(r.ticker)}</b><span class="acct">${esc(r.account)}</span><small>${esc(r.name)}</small></td><td>${q ? tb(q.tier, true) : ''}</td>
+        <td class="n">${px(r.price_local, r.listing_ccy)}</td><td class="n">${Number(r.units).toLocaleString('en-GB',{maximumFractionDigits:4})}</td><td class="n"><b>${gbp(r.value)}</b></td>
+        <td class="n">${pct(r.weight,1,false)}</td><td class="n">${mv(r.day_pct, pct(r.day_pct), .0005)}<small>${gbp(r.day_gbp,0,true)}</small></td>
+        <td class="n">${mv(r.pnl, gbp(r.pnl,0,true))}<small>${pct(r.pnl_pct)}</small></td><td>${e ? dNice(e.date) + `<small>in ${days(TODAY, e.date)} days</small>` : '<span class="muted">–</span>'}</td><td>${flags(r)}</td></tr>
+      <tr class="hd"><td colspan="10">${detail(r, q, r._i)}</td></tr>`; }).join('')}
+    <tr><td><b>Cash</b><small>GBP, uninvested</small></td><td></td><td></td><td></td><td class="n"><b>${gbp(s.tiles.cash, 2)}</b></td><td colspan="5" class="muted">${pct(s.tiles.cash / s.tiles.value,1,false)} of the account incl. cash</td></tr>
+    </tbody></table>`;
+}
+function hold(s){
+  return card('Holdings', `<div id="htab">${holdTable(s)}</div>`, {aside:`${s.holdings.length} lines · click a row to open it · a name held in both accounts shows as two rows; weights and bands still aggregate by ticker`});
+}
+
+/* ------------------------------ living background ------------------------------ */
+// Decorative only, never data. A perspective dotted wave carrying a glowing node
+// mesh (the network-grid look), plus drifting light streaks. It moves gently; the
+// wave lifts and brightens under the cursor, streaks swirl away from it, and the
+// scene parallaxes with the mouse. One static frame under reduce-motion.
+(function(){
+  const cv = document.getElementById('bg'); if(!cv || !cv.getContext) return;
+  const ctx = cv.getContext('2d');
+  let W = 0, H = 0;
+  const M = {x:.5, y:.45, tx:.5, ty:.45, px:-1e4, py:-1e4, tpx:-1e4, tpy:-1e4};
+  let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const COLS = 130, ROWS = 56, X0 = -7, X1 = 7, Z0 = 1.5, Z1 = 10, N = COLS * ROWS;
+  const SX = new Float32Array(N), SY = new Float32Array(N), SA = new Float32Array(N);
+  const depth = r => Z1 - (Z1 - Z0) * r / (ROWS - 1);
+  const fade = Z => Math.pow(1 - (Z - Z0) / (Z1 - Z0), 1.35);
+  const nodes = []; for(let r = 3; r < ROWS; r++) for(let c = 0; c < COLS; c++) if(rnd() < .034) nodes.push(r * COLS + c);
+  const links = []; nodes.forEach((a, i) => { for(let j = i + 1; j < nodes.length; j++){ const b = nodes[j];
+    if(Math.abs((a / COLS | 0) - (b / COLS | 0)) <= 4 && Math.abs(a % COLS - b % COLS) <= 7) links.push([a, b]); } });
+  const P = Array.from({length:240}, () => ({}));
+  const B = Array.from({length:16}, () => ({x:rnd(), y:.42 + rnd() * .2, r:30 + rnd() * 70, a:.05 + rnd() * .09, s:.2 + rnd() * .6}));
+  function spawn(p, edge){ p.x = edge ? -30 - rnd() * 200 : rnd() * W; p.y = rnd() * H; p.vx = 1; p.vy = 0;
+    p.sp = .6 + rnd() * 1.5; p.len = 9 + rnd() * 20; p.a = .22 + rnd() * .5; p.life = 300 + rnd() * 700; }
+  function size(){ const d = Math.min(1.5, window.devicePixelRatio || 1); W = innerWidth; H = innerHeight;
+    cv.width = W * d; cv.height = H * d; cv.style.width = W + 'px'; cv.style.height = H + 'px'; ctx.setTransform(d, 0, 0, d, 0, 0); }
+  function frame(t){
+    M.x += (M.tx - M.x) * .05; M.y += (M.ty - M.y) * .05;
+    if(M.tpx < -5e3 || M.px < -5e3){ M.px = M.tpx; M.py = M.tpy; }
+    else { M.px += (M.tpx - M.px) * .14; M.py += (M.tpy - M.py) * .14; }
+    ctx.globalCompositeOperation = 'source-over'; ctx.clearRect(0, 0, W, H);
+    const camX = (M.x - .5) * 1.4, camY = 1.15 + (M.y - .5) * .4, hz = H * (.30 - (M.y - .5) * .05), f = W * .42;
+    const gx = W * (.25 + .5 * M.x), g0 = ctx.createRadialGradient(gx, hz + H * .2, 0, gx, hz + H * .2, W * .65);
+    g0.addColorStop(0, 'rgba(24,100,200,.40)'); g0.addColorStop(.5, 'rgba(12,50,120,.16)'); g0.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g0; ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'lighter';
+    // soft bokeh haze along the horizon
+    for(const b of B){ const x = ((b.x + t * .000004 * b.s) % 1.1) * W, y = b.y * H, gb = ctx.createRadialGradient(x, y, 0, x, y, b.r);
+      gb.addColorStop(0, `rgba(80,190,255,${b.a})`); gb.addColorStop(1, 'rgba(80,190,255,0)'); ctx.fillStyle = gb; ctx.fillRect(x - b.r, y - b.r, b.r * 2, b.r * 2); }
+    // wave surface: project every grid point, lift and brighten it near the cursor
+    for(let r = 0; r < ROWS; r++){
+      const Z = depth(r), a0 = fade(Z);
+      for(let c = 0; c < COLS; c++){
+        const X = X0 + (X1 - X0) * c / (COLS - 1), k = r * COLS + c;
+        const Y = .26 * Math.sin(.75 * X + t * .00045 + .5 * Z) + .18 * Math.sin(.6 * Z - t * .00035 + .25 * X) + .08 * Math.sin(1.9 * X + 1.3 * Z + t * .0008);
+        const sx = W / 2 + (X - camX) / Z * f; let sy = hz + (camY - Y) / Z * f;
+        const dx = sx - M.px, dy = sy - M.py, g = Math.exp(-(dx * dx + dy * dy) / 57800);
+        sy -= g * 40 * (2.4 / Z + .3);
+        SX[k] = sx; SY[k] = sy; SA[k] = a0 * (.85 + g * 1.8);
+      }
+    }
+    ctx.lineWidth = 1;
+    for(let r = 0; r < ROWS; r += 3){ ctx.strokeStyle = `rgba(50,150,245,${(.05 + .28 * Math.pow(r / ROWS, 1.2)).toFixed(3)})`;
+      ctx.beginPath(); for(let c = 0; c < COLS; c++){ const k = r * COLS + c; c ? ctx.lineTo(SX[k], SY[k]) : ctx.moveTo(SX[k], SY[k]); } ctx.stroke(); }
+    ctx.strokeStyle = 'rgba(50,150,245,.13)';
+    for(let c = 0; c < COLS; c += 6){ ctx.beginPath(); for(let r = 0; r < ROWS; r++){ const k = r * COLS + c; r ? ctx.lineTo(SX[k], SY[k]) : ctx.moveTo(SX[k], SY[k]); } ctx.stroke(); }
+    for(let r = 0; r < ROWS; r++){
+      const Z = depth(r), base = fade(Z) * .85, sz = Math.max(1, 5 / Z), dim = `rgba(130,215,255,${Math.min(1, base).toFixed(3)})`;
+      ctx.fillStyle = dim;
+      for(let c = 0; c < COLS; c++){ const k = r * COLS + c, x = SX[k], y = SY[k];
+        if(x < -4 || x > W + 4 || y > H + 4) continue;
+        if(SA[k] > base * 1.25){ ctx.fillStyle = `rgba(170,235,255,${Math.min(1, SA[k]).toFixed(3)})`; ctx.fillRect(x, y, sz * 1.4, sz * 1.4); ctx.fillStyle = dim; }
+        else ctx.fillRect(x, y, sz, sz); }
+    }
+    // glowing node mesh riding the wave
+    for(const [a, b] of links){ const al = Math.min(SA[a], SA[b]) * .45; if(al < .01) continue;
+      ctx.strokeStyle = `rgba(86,180,233,${al.toFixed(3)})`; ctx.beginPath(); ctx.moveTo(SX[a], SY[a]); ctx.lineTo(SX[b], SY[b]); ctx.stroke(); }
+    for(const k of nodes){ const x = SX[k], y = SY[k], al = SA[k], rr = 9 / depth(k / COLS | 0);
+      if(x < -20 || x > W + 20 || y > H + 20) continue;
+      ctx.fillStyle = `rgba(86,190,255,${(al * .22).toFixed(3)})`; ctx.beginPath(); ctx.arc(x, y, rr * 3, 0, 6.283); ctx.fill();
+      ctx.fillStyle = `rgba(190,240,255,${Math.min(1, al * 1.3).toFixed(3)})`; ctx.beginPath(); ctx.arc(x, y, Math.max(1, rr * .55), 0, 6.283); ctx.fill(); }
+    // light streaks on a slow flow field; they swirl away from the cursor
+    ctx.lineWidth = 1.3;
+    for(const p of P){
+      const ang = -.22 + .55 * Math.sin(p.x * .0024 + t * .00012) * Math.cos(p.y * .0031 - t * .0001) + .25 * Math.sin((p.x - p.y) * .0012 + t * .00008);
+      let vx = Math.cos(ang) * p.sp, vy = Math.sin(ang) * p.sp, hot = 0;
+      const dx = p.x - M.px, dy = p.y - M.py, d = Math.sqrt(dx * dx + dy * dy);
+      if(d < 220 && d > 1){ const k = 1 - d / 220; hot = k; vx += (dx / d * 2.0 - dy / d * 1.6) * k; vy += (dy / d * 2.0 + dx / d * 1.6) * k; }
+      p.vx += (vx - p.vx) * .15; p.vy += (vy - p.vy) * .15; p.x += p.vx; p.y += p.vy; p.life--;
+      if(p.x > W + 40 || p.y < -40 || p.y > H + 40 || p.life < 0) spawn(p, p.x > W + 40);
+      ctx.strokeStyle = `rgba(${hot > .1 ? '170,240,255' : '90,200,240'},${Math.min(.9, p.a + hot * .5).toFixed(3)})`;
+      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * p.len, p.y - p.vy * p.len); ctx.stroke();
+    }
+  }
+  function loop(t){ requestAnimationFrame(loop); if(!document.hidden) frame(t); }
+  size(); P.forEach(p => spawn(p, false));
+  addEventListener('resize', () => { size(); if(RM) frame(0); });
+  addEventListener('pointermove', e => { M.tx = e.clientX / W; M.ty = e.clientY / H; M.tpx = e.clientX; M.tpy = e.clientY; }, {passive:true});
+  document.documentElement.addEventListener('pointerleave', () => { M.tpx = M.tpy = -1e4; });
+  if(RM) frame(0); else requestAnimationFrame(loop);
+})();
+
+/* ------------------------------ shell ------------------------------ */
+const RENDER = {front, alloc, perf, val, hold};
+let lastTab = 'front';
+function countUps(root){ if(RM) return; root.querySelectorAll('[data-count]').forEach(e => { const to = +e.dataset.count, f = FMT[e.dataset.fmt || 'int'], t0 = performance.now(), D = 1000;
+  const step = t => { const k = Math.min(1, (t - t0) / D); e.textContent = f(to * (1 - Math.pow(1 - k, 3))); if(k < 1) requestAnimationFrame(step); else e.textContent = f(to); };
+  requestAnimationFrame(step); }); }
+function moveInk(){ const b = document.querySelector(`nav.tabs [data-tab="${st.tab}"]`), ink = document.querySelector('nav.tabs .ink');
+  ink.style.left = b.offsetLeft + 'px'; ink.style.width = b.offsetWidth + 'px'; }
+function render(){
+  const pane = document.querySelector(`.pane[data-pane="${st.tab}"]`), dir = TABS.indexOf(st.tab) >= TABS.indexOf(lastTab) ? 'from-r' : 'from-l';
+  document.querySelectorAll('.pane').forEach(p => { Chart.disposeIn(p); if(p !== pane){ p.innerHTML = ''; p.className = 'pane'; } });
+  pending = []; perfCharts = {};
+  pane.innerHTML = RENDER[st.tab](S());
+  pane.className = 'pane'; void pane.offsetWidth; pane.className = 'pane on ' + dir;
+  pane.querySelectorAll('.rise').forEach((e, i) => e.style.setProperty('--i', Math.min(i, 16)));
+  flush(); countUps(pane);
+  document.querySelectorAll('nav.tabs [data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === st.tab));
+  document.querySelectorAll('[data-scope]').forEach(b => b.setAttribute('aria-pressed', b.dataset.scope === st.scope));
+  moveInk(); lastTab = st.tab;
+  try{ history.replaceState(null, '', '#' + st.tab + (st.scope !== 'All' ? '-' + st.scope : '') + (st.stale ? '-stale' : '')); }catch(e){}
+}
+function chrome(){
+  const m = DATA.meta, sp = DATA.stale_preview;
+  document.getElementById('ind-note').textContent = m.indicative_note;
+  document.querySelector('.ind-banner b').textContent = IND ? 'INDICATIVE PROTOTYPE' : 'LIVE DATA';
+  document.getElementById('stale-text').textContent = `Data is ${sp.age_h} h old (as of ${sp.as_of}): ${sp.reason}. Figures below are NOT current.`;
+  document.getElementById('fresh').innerHTML = st.stale ? `<span class="g">■</span> STALE · as of ${esc(sp.as_of)} (${sp.age_h} h)`
+    : `<span class="g">●</span> FRESH · as of ${esc(m.stamp)} · ${esc(m.built)}`;
+  document.body.classList.toggle('stale', st.stale);
+  document.querySelector('[data-act=stale]').setAttribute('aria-pressed', st.stale);
+  document.getElementById('foot').textContent = `Cockpit v2 prototype · schema ${DATA.schema} · rendered from the private repo's data.json · `
+    + `generated by execution/dashboard/build_cockpit_v2.py from ${IND ? 'skeleton_data.py' : 'portfolio_data.py'} · local file, never published.`;
+}
+document.addEventListener('click', ev => {
+  const t = ev.target.closest('[data-tab],[data-scope],[data-act],[data-cal],[data-range],th[data-sort],tr.hr'); if(!t) return;
+  if(t.dataset.tab){ st.tab = t.dataset.tab; render(); }
+  else if(t.dataset.scope){ st.scope = t.dataset.scope; st.cal = 0; render(); }
+  else if(t.dataset.act === 'stale'){ st.stale = !st.stale; chrome(); render(); }
+  else if(t.dataset.cal){ st.cal = Math.max(0, st.cal + +t.dataset.cal); document.getElementById('cal').innerHTML = calendar(S()); }
+  else if(t.dataset.range){ setRange(t.dataset.range); }
+  else if(t.matches('th[data-sort]')){ const tbl = t.closest('table').dataset.tbl, key = t.dataset.sort, cur = tbl === 'risk' ? st.rsort : st.hsort;
+    const next = [key, cur[0] === key ? -cur[1] : (key === 't' || key === 'ticker' ? 1 : -1)];
+    if(tbl === 'risk'){ st.rsort = next; document.getElementById('rtab').innerHTML = riskTable(S()); }
+    else { st.hsort = next; document.getElementById('htab').innerHTML = holdTable(S()); } }
+  else if(t.matches('tr.hr')){ t.classList.toggle('open'); const d = t.nextElementSibling; d.classList.toggle('open');
+    const el = d.querySelector('[data-spark]'); if(el && d.classList.contains('open') && !el.dataset.done){ el.dataset.done = 1; Chart.mount(el, sparkOpt(S().holdings[+el.dataset.spark].spark)); } }
+});
+window.addEventListener('resize', moveInk);
+const h = (location.hash || '').replace('#', '').split('-');
+if(TABS.includes(h[0])) st.tab = h[0];
+if(DATA.scopes[h[1]]) st.scope = h[1];
+if(h.includes('stale') || DATA.meta.live_stale) st.stale = true;
+lastTab = st.tab; chrome(); render();
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(moveInk);
+})();
+};</script>
+<script>
+(function(){
+'use strict';
+const CFG = {"repo": "GForce1700/portfolio-data", "schema": "cockpit-v2/0.1"}, KEY = 'cockpit-v2:token', RKEY = 'cockpit-v2:repo';
+const $ = id => document.getElementById(id);
+const store = (k, v) => { try{ v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); }catch(e){} };
+const read = k => { try{ return localStorage.getItem(k); }catch(e){ return null; } };
+function ask(msg){ $('gate').hidden = false; $('gate-msg').textContent = msg || '';
+  $('gate-repo').value = read(RKEY) || CFG.repo || ''; $('gate-token').focus(); }
+// ?local reads ./data.json + ./status.json beside the page (publish_dashboard.py --stage, then a
+// local http server): the whole loader, gate and stale path test without GitHub or a token.
+const LOCAL = new URLSearchParams(location.search).has('local');
+async function get(repo, tok, path){
+  const r = LOCAL ? await fetch('./' + path, {cache:'no-store'}) : await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {cache:'no-store',
+    headers:{Authorization:'Bearer ' + tok, Accept:'application/vnd.github.raw+json', 'X-GitHub-Api-Version':'2022-11-28'}});
+  if(!r.ok) throw new Error(String(r.status));
+  return r.json();
+}
+const fill = (o, kw) => JSON.parse(JSON.stringify(o).replace(/\{(\w+)\}/g, (m, k) => k in kw ? kw[k] : m));
+function freshness(d, s){
+  const n = new Date(), z = x => String(x).padStart(2, '0');
+  d.meta.today = `${n.getFullYear()}-${z(n.getMonth() + 1)}-${z(n.getDate())}`;   // the calendar's "today" is the viewer's
+  if(!s) return;
+  const age = (n - Date.parse(s.fetched_at)) / 36e5, lim = d.meta.stale_after_h;
+  if(s.held || age > lim){
+    const kw = {hours: Math.round(age), date: s.fetched_label};
+    d.stale_preview = {age_h: Math.round(age), as_of: s.fetched_label, queue: [s.held ? s.held_card : fill(s.stale_card, kw)],
+      reason: s.held ? s.reason : `the last good T212 read is ${Math.round(age)} h old (limit ${lim} h)`};
+    d.meta.live_stale = true;
+  }
+}
+async function boot(){
+  const repo = read(RKEY) || CFG.repo, tok = read(KEY);
+  if(!LOCAL && (!repo || !tok)) return ask();
+  let data, status;
+  try{ [data, status] = await Promise.all([get(repo, tok, 'data.json'), get(repo, tok, 'status.json').catch(() => null)]); }
+  catch(e){ const c = e.message;
+    return ask(c === '401' || c === '403' ? 'GitHub refused that token (expired, or not scoped to this repo). Paste a fresh read-only token.'
+      : c === '404' ? `Nothing at ${repo}/data.json. Check the repo name, or whether the nightly publish has run yet.`
+      : `Could not reach GitHub (${c}). Offline?`); }
+  if(data.schema !== CFG.schema) return ask(`This page reads ${CFG.schema} but the data is ${data.schema}. Rebuild the shell.`);
+  freshness(data, status);
+  $('cockpit-data').textContent = JSON.stringify(data);
+  $('gate').hidden = true;
+  window.__cockpit();
+}
+$('gate-form').addEventListener('submit', ev => { ev.preventDefault();
+  store(RKEY, $('gate-repo').value.trim()); store(KEY, $('gate-token').value.trim()); $('gate-token').value = ''; boot(); });
+$('gate-forget').addEventListener('click', () => { store(KEY, null); ask('Token forgotten on this browser.'); });
+boot();
+})();
+</script>
+</body>
+</html>
