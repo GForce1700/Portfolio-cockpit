@@ -32,7 +32,7 @@ header.top{display:flex;align-items:center;gap:18px;padding:22px 0 12px}
 .brand{display:flex;gap:12px;align-items:center}
 .brand .logo{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;font-size:21px;color:var(--accent);
   background:linear-gradient(135deg,rgba(var(--acc),.32),rgba(var(--acc),.04));border:1px solid var(--card-b);box-shadow:var(--glow)}
-.brand b{display:block;font-size:19px;letter-spacing:-.01em}.brand small{color:var(--ink2);font-size:12px}
+.brand b{display:block;font-size:19px;letter-spacing:-.01em}
 .fresh{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--card-b);background:var(--card);border-radius:999px;
   padding:5px 14px;font-size:12.5px;font-weight:600;color:var(--ink2)}
 .fresh .g{color:var(--st-good)} body.stale .fresh{border:2px solid var(--st-bad);color:var(--ink)} body.stale .fresh .g{color:var(--st-bad)}
@@ -222,7 +222,6 @@ tr.hd>td{background:rgba(255,255,255,.028);padding:16px 18px 18px}
 .perf-top{display:flex;align-items:center;gap:20px;margin-bottom:18px}
 .psum{display:flex;gap:26px;font-size:13px;color:var(--ink2)}.psum b{display:block;font-size:22px;color:var(--ink);font-weight:800}
 .mult{font-size:12px;line-height:1.5;white-space:nowrap}
-footer.foot{font-size:12px;color:var(--ink3);border-top:1px solid var(--grid);padding-top:12px;margin-top:20px}
 
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 .gate{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(4,7,16,.7)}
@@ -246,7 +245,7 @@ footer.foot{font-size:12px;color:var(--ink3);border-top:1px solid var(--grid);pa
 <div class="stale-banner" role="alert"><b>■ STALE</b> <span id="stale-text"></span></div>
 <div class="wrap">
 <header class="top">
-  <div class="brand"><span class="logo">◈</span><div><b>Portfolio cockpit</b><small>v2 prototype · desktop 1920 × 1080</small></div></div>
+  <div class="brand"><span class="logo">◈</span><div><b>Portfolio cockpit</b></div></div>
   <div id="fresh" class="fresh"></div>
   <span class="sp"></span>
   <div class="seg" role="group" aria-label="Account"><span class="lbl">Account</span><button data-scope="ISA">ISA</button><button data-scope="Invest">Invest</button><button data-scope="All">All</button></div>
@@ -262,7 +261,6 @@ footer.foot{font-size:12px;color:var(--ink3);border-top:1px solid var(--grid);pa
   <section class="pane" data-pane="perf"></section><section class="pane" data-pane="val"></section>
   <section class="pane" data-pane="hold"></section>
 </main>
-<footer class="foot" id="foot"></footer>
 </div>
 <script id="cockpit-data" type="application/json"></script>
 <script>window.__cockpit = function(){
@@ -279,6 +277,8 @@ const BAR = DATA.meta.double_bar, TODAY = DATA.meta.today;
 // Live data (Phase 4) vs the indicative prototype: the captions below that only made sense on
 // placeholder data switch on this flag. Copy only; layout, style and charts are the same.
 const IND = !!DATA.meta.indicative, SRC = IND ? '✓ T212' : '✓ ledger', ind = (proto, live) => IND ? proto : live;
+// Sector/region map captions show only while George has lines unconfirmed (emitter sends '' once confirmed).
+const prov = (k, txt) => (DATA.meta.provisional || {})[k] ? tag(txt) : '';
 const closeValue = s => { const a = s.perf.ranges.YTD.actual; return a[a.length - 1]; };
 
 /* ------------------------------ formatting ------------------------------ */
@@ -643,7 +643,7 @@ function needsYou(s){
 }
 function front(s){
   return tiles(s) + `<div class="g-front2">
-    ${card('Sector → holdings', sunburstBlock(s.sunburst.sector, gbpk(s.tiles.equity) + '\nequity'), {tags:tag('◇ sector map provisional · open item 4'), aside:'holdings ≥ 5% named on the ring'})}
+    ${card('Sector → holdings', sunburstBlock(s.sunburst.sector, gbpk(s.tiles.equity) + '\nequity'), {tags:prov('sector', '◇ sector map provisional · open item 4'), aside:'holdings ≥ 5% named on the ring'})}
     ${card('Value · last 12 months', slot(el => Chart.mount(el, valueLineOpt(s.value_1y)), 'h-420'), {tags:tag(ind('◇ back-cast path', '✓ ledger')), aside:ind('ends on the T212 value (' + DATA.meta.source + ') · shape is an estimate until the ledger', 'daily close value from the ledger · the value tile is T212\'s live read')})}</div>
     ${card('Calendar', `<div id="cal">${calendar(s)}</div>`, {aside:'earnings_calendar.csv + dividend calendar · follows the account toggle'})}
     ${needsYou(s)}`;
@@ -669,11 +669,11 @@ function alloc(s){
       : gc('CNN Fear &amp; Greed', tag(ind('◇ indicative', '◇ unofficial CNN feed')), fgOpt(fg.now), `US market mood, 0–100 · as of ${dShort(fg.as_of)}`,
       `<div class="fgh">${fgx('Yesterday', fg.prev)}${fgx('1 week', fg.w1)}${fgx('1 month', fg.m1)}${mv(fg.now - fg.m1, (fg.now - fg.m1 > 0 ? '+' : MINUS) + Math.abs(fg.now - fg.m1) + ' vs 1m')}</div>`)}
   </div>
-  <div class="g2">${card('Sector → holdings', sunburstBlock(s.sunburst.sector, gbpk(s.tiles.equity) + '\nequity'), {tags:tag('◇ provisional · open item 4')})}
+  <div class="g2">${card('Sector → holdings', sunburstBlock(s.sunburst.sector, gbpk(s.tiles.equity) + '\nequity'), {tags:prov('sector', '◇ provisional · open item 4')})}
     ${card('Currency → holdings', sunburstBlock(s.sunburst.currency, gbpk(s.tiles.equity) + '\nequity'), {aside:'listing currency' + s.sunburst.currency.filter(c => /risk/.test(c.name)).map(c => ` · ${c.children.map(k => k.name).join(', ')} carr${c.children.length > 1 ? 'y' : 'ies'} ${c.name.replace(/^.*\((\w+) risk\)$/, '$1')} risk`).join('')})}</div>
   <div class="g3">${card('Account split', slot(el => Chart.mount(el, donutOpt(s.part.account, gbpk(s.tiles.value)), {decal:true}), 'h-320'))}
     ${card('Stocks · ETFs · cash', slot(el => Chart.mount(el, donutOpt(s.part.asset, gbpk(s.tiles.value)), {decal:true}), 'h-320'))}
-    ${card('Region of business', slot(el => Chart.mount(el, donutOpt(s.part.region, gbpk(s.tiles.equity)), {decal:true}), 'h-320'), {tags:tag(ind('◇ placeholder map · open item 5', '◇ draft map · open item 5'))})}</div>
+    ${card('Region of business', slot(el => Chart.mount(el, donutOpt(s.part.region, gbpk(s.tiles.equity)), {decal:true}), 'h-320'), {tags:IND ? tag('◇ placeholder map · open item 5') : prov('region', '◇ draft map · open item 5')})}</div>
   <div class="g-risk">${card('Risk share vs weight', slot(el => Chart.mount(el, riskScatterOpt(s)), 'h-460'), {aside:'above the diagonal = more risk than weight'})}
     ${card('Risk contribution', `<div id="rtab">${riskTable(s)}</div>`, {aside:`${esc(s.risk.window)} · weekly GBP returns · ${s.risk.covered} covered`})}</div>`;
 }
@@ -955,8 +955,6 @@ function chrome(){
     : `<span class="g">●</span> FRESH · as of ${esc(m.stamp)} · ${esc(m.built)}`;
   document.body.classList.toggle('stale', st.stale);
   document.querySelector('[data-act=stale]').setAttribute('aria-pressed', st.stale);
-  document.getElementById('foot').textContent = `Cockpit v2 prototype · schema ${DATA.schema} · rendered from the private repo's data.json · `
-    + `generated by execution/dashboard/build_cockpit_v2.py from ${IND ? 'skeleton_data.py' : 'portfolio_data.py'} · local file, never published.`;
 }
 document.addEventListener('click', ev => {
   const t = ev.target.closest('[data-tab],[data-scope],[data-act],[data-cal],[data-range],th[data-sort],tr.hr'); if(!t) return;
