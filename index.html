@@ -984,7 +984,7 @@ if(document.fonts && document.fonts.ready) document.fonts.ready.then(moveInk);
 <script>
 (function(){
 'use strict';
-const CFG = {"repo": "GForce1700/portfolio-data", "schema": "cockpit-v2/0.1"}, KEY = 'cockpit-v2:token', RKEY = 'cockpit-v2:repo';
+const CFG = {"repo": "GForce1700/Portfolio-data", "schema": "cockpit-v2/0.1"}, KEY = 'cockpit-v2:token', RKEY = 'cockpit-v2:repo';
 const $ = id => document.getElementById(id);
 const store = (k, v) => { try{ v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); }catch(e){} };
 const read = k => { try{ return localStorage.getItem(k); }catch(e){ return null; } };
